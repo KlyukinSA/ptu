@@ -29,6 +29,7 @@ def alter_proportion_show_graph(values, labels, name):
     set_values = []
     accuracy = []
     accuracy2 = []
+    accuracy3 = []
     for i in range(1, 10):
         set_values.append(start_train_size * i)
         v, test_v, l, test_l = train_test_split(values, labels, train_size=(set_values[-1]))
@@ -38,16 +39,18 @@ def alter_proportion_show_graph(values, labels, name):
             predicted = gnb.predict(test_v)
             sum += accuracy_score(test_l, predicted)
         accuracy.append(sum / avgc)
-        sum = 0
+        sum2 = 0
         for _ in range(avgc):
             gnb.fit(v, l)
             predicted = gnb.predict(v)
-            sum += accuracy_score(l, predicted)
-        accuracy2.append(sum / avgc)
-    print(polyfit(set_values, accuracy, 1))
+            sum2 += accuracy_score(l, predicted)
+        accuracy2.append(sum2 / avgc)
+        accuracy3.append([sum / avgc, sum2 / avgc])
     graphs(set_values, accuracy, name)
-    print(polyfit(set_values, accuracy2, 1))
+    print(polyfit(set_values, accuracy, 1))
     graphs(set_values, accuracy2, name)
+    print(polyfit(set_values, accuracy2, 1))
+    graphs(set_values, accuracy3, name)
 
 f = open(data_base_dir + "tic_tac_toe.txt", "r")
 lines = f.readlines()
