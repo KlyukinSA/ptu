@@ -6,20 +6,38 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 data_base_dir = "./"
+avgc = 1
+gnb = GaussianNB()
 
 def graphs(set_values, accuracy, title):
+    """
     plt.plot(set_values, accuracy)
     plt.title(title)
     plt.xlabel('training / all')
     plt.ylabel('accuracy')
     plt.show()
+    """
     plt.plot(set_values, accuracy, scaley=False)
     plt.title(title)
     plt.xlabel('training / all')
     plt.ylabel('accuracy')
     plt.show()
 
-gnb = GaussianNB()
+def alter_proportion_show_graph(values, labels, name):
+    start_train_size = 0.1
+    set_values = []
+    accuracy = []
+    for i in range(1, 10):
+        set_values.append(start_train_size * i)
+        v, test_v, l, test_l = train_test_split(values, labels, train_size=(set_values[-1]))
+        sum = 0
+        for _ in range(avgc):
+            gnb.fit(v, l)
+            predicted = gnb.predict(test_v)
+            sum += accuracy_score(test_l, predicted)
+        accuracy.append(sum / avgc)
+    graphs(set_values, accuracy, name)
+
 f = open(data_base_dir + "tic_tac_toe.txt", "r")
 lines = f.readlines()
 f.close()
@@ -43,16 +61,8 @@ for i in range(0, len(lines)):
     values.append(value)
     labels.extend(label)
 
-start_train_size = 0.1
-set_values = []
-accuracy = []
-for i in range(1, 10):
-    set_values.append(start_train_size * i)
-    v, test_v, l, test_l = train_test_split(values, labels, train_size=(set_values[-1]))
-    gnb.fit(v, l)
-    predicted = gnb.predict(test_v)
-    accuracy.append(accuracy_score(test_l, predicted))
-graphs(set_values, accuracy, "tic-tac-toe")
+alter_proportion_show_graph(values, labels, "tic-tac-toe")
+
 
 labels_map = {
     'spam': 0,
@@ -69,19 +79,11 @@ def prepareData(lines):
         lines = tmp.split(",")
         values.append(lines[1:-1])
         labels.append(labels_map[lines[-1]])
-    return (np.array(values).astype(np.float), labels)
+    return (np.array(values).astype(np.float64), labels)
 
 f = open(data_base_dir + "spam.csv", "r")
 lines = f.readlines()
 f.close()
 values, labels = prepareData(lines[1:])
-set_values = []
-accuracy = []
-start = 0.1
-for i in range(1, 10):
-    set_values.append(start * i)
-    v, test_v, l, test_l = train_test_split(values, labels, test_size=set_values[-1])
-    gnb.fit(v, l)
-    predicted = gnb.predict(test_v)
-    accuracy.append(accuracy_score(test_l, predicted))
-graphs(set_values, accuracy, "spam")
+
+alter_proportion_show_graph(values, labels, "spam")
