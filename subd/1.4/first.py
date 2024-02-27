@@ -26,9 +26,6 @@ seeall()
 
 print("lost update")
 
-new_isolation_level_to_try="SERIALIZABLE"
-conn1.set_session(new_isolation_level_to_try)
-conn2.set_session(new_isolation_level_to_try)
 cur1.execute("update tour set price = price + 1 where id = 1;")
 cur2.execute("update tour set price = price + 2 where id = 1;")
 conn1.commit()
