@@ -1,0 +1,36 @@
+Overview:
+For this assignment, students will create a 10-15 minute presentation on the programming project they completed for their final course project. The presentation should give an overview of their project, explain the code and program functionality, share project demonstrations, discuss challenges faced, and highlight their learning.
+
+
+Presentation Format:
+
+    Introduction/Overview
+        Brief background on project idea/purpose
+        Explain programming languages/tools used
+    Demo & Explanation of Code
+        Show snippets of important code
+        Explain how code works to create program functions
+        Demonstrate running program and key features
+    Challenges
+        Explain any major obstacles faced in development
+        Share how these were solved or things you would improve next time
+    Conclusion
+        Key learnings from project development
+        Next steps if continuing to build on the project going forward
+
+
+Requirements:
+
+    10-15 minutes in length
+    Include visual presentation slides highlighting code, program demos, images, etc.
+    Prepare working program demonstration and code snippets to walk through
+    Practice presentation flow and timing before final delivery
+
+
+Grading:
+Students will be graded on:
+
+    Content covering all elements of project development
+    Program functionality and code explanation
+    Preparation and smooth delivery of presentation
+    Ability to field questions from classmates on the project

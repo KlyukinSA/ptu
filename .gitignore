@@ -4,9 +4,11 @@
 *.doc
 *.docx
 *.png
-*.odt
-*.ods
-*.odp
+*.odt*
+*.ods*
+*.odp*
 *mash*
 *vsphi*
 *.zip
+*.svg
+urpo
