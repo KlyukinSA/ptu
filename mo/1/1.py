@@ -4,9 +4,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import GaussianNB
 import numpy as np
 import matplotlib.pyplot as plt
+from numpy import polyfit
 
 data_base_dir = "./"
-avgc = 1
+avgc = 5
 gnb = GaussianNB()
 
 def graphs(set_values, accuracy, title):
@@ -27,6 +28,7 @@ def alter_proportion_show_graph(values, labels, name):
     start_train_size = 0.1
     set_values = []
     accuracy = []
+    accuracy2 = []
     for i in range(1, 10):
         set_values.append(start_train_size * i)
         v, test_v, l, test_l = train_test_split(values, labels, train_size=(set_values[-1]))
@@ -36,7 +38,16 @@ def alter_proportion_show_graph(values, labels, name):
             predicted = gnb.predict(test_v)
             sum += accuracy_score(test_l, predicted)
         accuracy.append(sum / avgc)
+        sum = 0
+        for _ in range(avgc):
+            gnb.fit(v, l)
+            predicted = gnb.predict(v)
+            sum += accuracy_score(l, predicted)
+        accuracy2.append(sum / avgc)
+    print(polyfit(set_values, accuracy, 1))
     graphs(set_values, accuracy, name)
+    print(polyfit(set_values, accuracy2, 1))
+    graphs(set_values, accuracy2, name)
 
 f = open(data_base_dir + "tic_tac_toe.txt", "r")
 lines = f.readlines()
