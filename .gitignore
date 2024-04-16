@@ -1,6 +1,5 @@
 *.pdf
-*.ppt
-*.pptx
+*.ppt*
 *.doc
 *.docx
 *.png
