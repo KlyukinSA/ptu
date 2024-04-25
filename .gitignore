@@ -11,7 +11,7 @@
 *.zip
 *.svg
 urpo
-*.jpg
+*.jp*
 *.odg
 *.o
 *.out
