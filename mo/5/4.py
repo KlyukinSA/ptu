@@ -20,8 +20,7 @@ def MAE(real, predicate):
 dataset = pn.read_csv('longley.csv', sep=',').to_numpy()
 dataset = dataset[:, [0, 1, 2, 3, 5, 6]]
 dataset_answer = dataset[:, -1]
-dataset_test, dataset_train, dataset_answer_test, dataset_answer_train \
-    = train_test_split(dataset, dataset_answer, train_size=0.5)
+dataset_test, dataset_train, dataset_answer_test, dataset_answer_train = train_test_split(dataset, dataset_answer, train_size=0.5)
 
 classif1 = LinearRegression().fit(dataset_train, dataset_answer_train)
 print("1 score train: ", classif1.score(dataset_train, dataset_answer_train))
@@ -34,13 +33,10 @@ print("1 MAE test: ", mean_absolute_error(dataset_answer_test, classif1.predict(
 classif2 = LinearRegression().fit(dataset_answer_train.reshape(len(dataset_answer_train), -1), dataset_train)
 print("2 score train: ", classif2.score(dataset_answer_train.reshape(len(dataset_answer_train), -1), dataset_train))
 print("2 score test: ", classif2.score(dataset_answer_test.reshape(len(dataset_answer_test), -1), dataset_test))
-print("2 RSS train: ",
-      RSS(dataset_train, classif2.predict(dataset_answer_train.reshape(len(dataset_answer_train), -1))))
+print("2 RSS train: ", RSS(dataset_train, classif2.predict(dataset_answer_train.reshape(len(dataset_answer_train), -1))))
 print("2 RSS test: ", RSS(dataset_test, classif2.predict(dataset_answer_test.reshape(len(dataset_answer_test), -1))))
-print("2 MAE train: ",
-      mean_absolute_error(dataset_train, classif2.predict(dataset_answer_train.reshape(len(dataset_answer_train), -1))))
-print("2 MAE test: ",
-      mean_absolute_error(dataset_test, classif2.predict(dataset_answer_test.reshape(len(dataset_answer_test), -1))))
+print("2 MAE train: ", mean_absolute_error(dataset_train, classif2.predict(dataset_answer_train.reshape(len(dataset_answer_train), -1))))
+print("2 MAE test: ", mean_absolute_error(dataset_test, classif2.predict(dataset_answer_test.reshape(len(dataset_answer_test), -1))))
 
 accuracy_train = []
 accuracy_test = []
