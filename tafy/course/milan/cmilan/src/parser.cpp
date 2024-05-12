@@ -43,11 +43,18 @@ void Parser::statement()
 	// Следующей лексемой должно быть присваивание. Затем идет блок expression, который возвращает значение на вершину стека.
 	// Записываем это значение по адресу нашей переменной
 	if(see(T_IDENTIFIER)) {
-		int varAddress = findOrAddVariable(scanner_->getStringValue());
+		string varname = scanner_->getStringValue();
 		next();
 		mustBe(T_ASSIGN);
-		expression();
-		codegen_->emit(STORE, varAddress);
+		if(see(T_LBRACKET)) {
+			segment();
+			int pos = findOrAddSegment(varname);
+			codegen_->emit(STORE, pos + 1);
+			codegen_->emit(STORE, pos);
+		} else {
+			expression();
+			codegen_->emit(STORE, findOrAddVariable(varname));
+		}
 	}
 	// Если встретили IF, то затем должно следовать условие. На вершине стека лежит 1 или 0 в зависимости от выполнения условия.
 	// Затем зарезервируем место для условного перехода JUMP_NO к блоку ELSE (переход в случае ложного условия). Адрес перехода
@@ -101,6 +108,15 @@ void Parser::statement()
 	else {
 		reportError("statement expected.");
 	}
+}
+
+void Parser::segment()
+{
+	next();
+	expression();
+	mustBe(T_COMMA);
+	expression();
+	mustBe(T_RBRACKET);
 }
 
 void Parser::expression()
@@ -226,20 +242,59 @@ void Parser::relation()
 				break;
 		};
 	}
+	else if(see(T_IN)) {
+		next();
+
+		codegen_->emit(DUP); // duplicate expr
+
+		mustBe(T_IDENTIFIER); // TODO accept segment literal
+		int varAddress = findOrAddSegment(scanner_->getStringValue());
+
+		codegen_->emit(LOAD, varAddress);
+		codegen_->emit(COMPARE, 5); // expr >= seg.left
+		codegen_->emit(DUP); // save 0
+
+		int jumpNoAddress = codegen_->reserve();
+
+		codegen_->emit(POP); // dont save 1
+		codegen_->emit(LOAD, varAddress + 1);
+		codegen_->emit(COMPARE, 4); // expr <= seg.right
+
+		codegen_->emitAt(jumpNoAddress, JUMP_NO, codegen_->getCurrentAddress());
+	}
 	else {
 		reportError("comparison operator expected.");
 	}
 }
 
-int Parser::findOrAddVariable(const string& var)
+int Parser::findOrAddVariable(const string& name)
 {
-	VarTable::iterator it = variables_.find(var);
+	VarTable::iterator it = variables_.find(name);
 	if(it == variables_.end()) {
-		variables_[var] = lastVar_;
+		Variable &variable = variables_[name];
+		variable.type = Variable::VarType::number;
+		variable.ram_pos = lastVar_;
 		return lastVar_++;
 	}
 	else {
-		return it->second;
+		// TODO error for type
+		return it->second.ram_pos;
+	}
+}
+
+int Parser::findOrAddSegment(const string& name)
+{
+	VarTable::iterator it = variables_.find(name);
+	if(it == variables_.end()) {
+		Variable &variable = variables_[name];
+		variable.type = Variable::VarType::segment;
+		variable.ram_pos = lastVar_;
+		lastVar_ += 2;
+		return variable.ram_pos;
+	}
+	else {
+		// TODO error for type
+		return it->second.ram_pos;
 	}
 }
 

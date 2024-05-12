@@ -56,11 +56,19 @@ public:
 	void parse();	//проводим синтаксический разбор 
 
 private:
-	typedef map<string, int> VarTable;
+	struct Variable
+	{
+		enum VarType { number, segment };
+		VarType type;
+		int ram_pos;
+	};
+
+	typedef map<string, Variable> VarTable;
 	//описание блоков.
 	void program(); //Разбор программы. BEGIN statementList END
 	void statementList(); // Разбор списка операторов.
 	void statement(); //разбор оператора.
+	void segment(); //разбор выражения отрезка (пара чисел)
 	void expression(); //разбор арифметического выражения.
 	void term(); //разбор слагаемого.
 	void factor(); //разбор множителя.
@@ -106,6 +114,7 @@ private:
 	//пока не встретим эту лексему или лексему конца файла.
 	int findOrAddVariable(const string&); //функция пробегает по variables_. 
 	//Если находит нужную переменную - возвращает ее номер, иначе добавляет ее в массив, увеличивает lastVar и возвращает его.
+	int findOrAddSegment(const string&);
 
 	Scanner* scanner_; //лексический анализатор для конструктора
 	CodeGen* codegen_; //указатель на виртуальную машину

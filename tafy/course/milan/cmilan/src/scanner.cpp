@@ -201,6 +201,22 @@ void Scanner::nextToken()
 				arithmeticValue_ = A_MULTIPLY;
 				nextChar();
 				break;
+
+			case '[':
+				token_ = T_LBRACKET;
+				nextChar();
+				break;
+
+			case ']':
+				token_ = T_RBRACKET;
+				nextChar();
+				break;
+
+			case ',':
+				token_ = T_COMMA;
+				nextChar();
+				break;
+
 			//Иначе лексема ошибки.
 			default:
 				token_ = T_ILLEGAL;

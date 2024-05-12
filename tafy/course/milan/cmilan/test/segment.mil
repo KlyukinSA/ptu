@@ -1,0 +1,12 @@
+BEGIN
+        segment := [1, 5];
+        IF 0 in segment THEN
+                WRITE(1)
+        FI;
+        IF 5 in segment THEN
+                WRITE(2222)
+        FI;
+        IF 6 in segment THEN
+                WRITE(3)
+        FI
+END

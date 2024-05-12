@@ -21,3 +21,10 @@ $(EXE): $(OBJS) $(HEADERS)
 clean:
 	-@rm -f $(EXE) $(OBJS)
 
+vm: $(EXE)
+	./$< ../test/if.mil | ../../vm/vm/mvm
+	./$< ../test/segment.mil | ../../vm/vm/mvm
+
+c: $(EXE)
+	# ./$< ../test/if.mil
+	./$< ../test/segment.mil
