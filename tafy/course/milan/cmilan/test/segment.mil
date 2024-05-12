@@ -1,12 +1,19 @@
 BEGIN
-        segment := [1, 5];
+        segment := [1, 1+4];
         IF 0 in segment THEN
                 WRITE(1)
         FI;
         IF 5 in segment THEN
                 WRITE(2222)
         FI;
-        IF 6 in segment THEN
+        IF 5 + 1 in segment THEN
                 WRITE(3)
-        FI
+        FI;
+        
+        i := 3;
+        while i in segment do WRITE(i); i := i + 1 od
+
+        /* seg := [1,] */
+        /* seg := [1,1 */
+        /* IF 6 in segment + 1 THEN WRITE(4) FI */
 END

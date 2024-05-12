@@ -1,0 +1,392 @@
+отчет к курсовой работе
+
+1. Формулировка задания.
+Добавить интервальный тип (отрезок целого типа). Пункт 13.
+
+Пусть станет доступен такой пример:
+```
+segment := [1, 5];
+IF 5 in segment THEN
+/* перейдет сюда */
+FI;
+IF 6 in segment THEN
+/* НЕ перейдет сюда */
+FI
+```
+
+2. Измененная грамматика в виде продукций или формул БНФ или диаграмм.
+
+Будем приводить Statement и Relation т к только они будут изменены.
+
+Исходная:
+
+[Statement]     :--+--> T_IDENTIFIER --> T_ASSIGN --> [Expression] --------------------------------------------------------->--->.
+                    |                                                                                                         ^
+                    +--> T_IF --> [Relation] --> T_THEN --> [StatementList] --+--> T_ELSE --> [StatementList] -->---> T_FI -->|
+                    |                                                         |                                  ^            ^
+                    |                                                         \----------------------------------/            |
+                    |                                                                                                         |
+                    +--> T_WHILE --> [Relation] --> T_DO --> [StatementList] --> T_OD --------------------------------------->|
+                    |                                                                                                         ^
+                    \--> T_WRITE --> T_LPAREN --> [Expression] --> T_RPAREN --------------------------------------------------/
+    
+    
+[Relation]      :--> [Expression] --> T_CMP --> [Expression] -->.
+    
+Новая:
+
+[Statement]     :---+-> T_IDENTIFIER --> T_ASSIGN +-> [Expression] --------------------------------------------------------->--->.
+                    |                             |                                                                           ^
+                    |                             \-> T_LBRACKET -> [Expression] -> T_COMMA -> [Expression] -> T_RBRACKET --->|
+                    |                                                                                                         |
+                    +--> T_IF --> [Relation] --> T_THEN --> [StatementList] --+--> T_ELSE --> [StatementList] -->---> T_FI -->|
+                    |                                                         |                                  ^            ^
+                    |                                                         \----------------------------------/            |
+                    |                                                                                                         |
+                    +--> T_WHILE --> [Relation] --> T_DO --> [StatementList] --> T_OD --------------------------------------->|
+                    |                                                                                                         ^
+                    \--> T_WRITE --> T_LPAREN --> [Expression] --> T_RPAREN --------------------------------------------------/
+    
+    
+[Relation]      :--> [Expression] +-> T_CMP --> [Expression] ----->.
+                                  |                             ^
+                                  \--> T_IN --> T_IDENTIFIER ---/
+    
+3. Пояснения к новым возможностям. Их семантика.
+
+Когда мы присваеваем идентификатору пару чисел через запятую в квадратных скобках мы сохраняем в его переменной математический отрезок. Далее в выражениях где нужно условие мы можем проверить принадлежность заданного числа этому отрезку с помощью слова in. Справа от in может стоять только имя переменной. Подразумевается что это переменная, в которую мы ранее положили отрезок.
+
+4. Реализация: Изменения в лексическом анализаторе
+
+Внесем в те места программы, которые обрабатывают Statement и Relation возможности по обработке еще и моих новых частей. Кроме того надо будет изменить хранилище переменных для обозначения типа хранимых переменных и дописать новые штуки во всякие файлы где они перечисляются.
+
+5. Примеры.
+
+можно проверить что обычное условите работает (обратная совместимость):
+
+BEGIN
+    i := 1;
+    j := 2;
+    
+    IF i < j THEN WRITE(i) FI;
+    IF i < j THEN WRITE(i) ELSE WRITE(j) FI
+END
+
+выведет 
+
+1
+1
+
+да, работает.
+
+теперь можно всякое поделать с моими отрезками
+
+segment := [1, 1+4];
+IF 0 in segment THEN
+    WRITE(1)
+FI;
+...
+стоп. тут посмотрим что на этот момент выдает копилятор
+0:	PUSH	1   ; левая часть
+1:	PUSH	1   ; правая..
+2:	PUSH	4   ; ..часть
+3:	ADD
+4:	STORE	1   ; сначала во вторую ячейку..
+5:	STORE	0   ; потом в первую поместили границы
+6:	PUSH	0   ; вычислили expr = 0
+7:	DUP
+8:	LOAD	0   ; сравниваем его..
+9:	COMPARE	5   ; ..с левой частью
+10:	DUP
+11:	JUMP_NO	15  ; пропускаем правую часть если левая уже 0
+12:	POP
+13:	LOAD	1   ; сравниваем копию expr с..
+14:	COMPARE	4   ; ..правой
+15:	JUMP_NO	18  ; прыжок ифа
+16:	PUSH	1   ; вывод констаты 1
+17:	PRINT
+18:	STOP
+возвращаемся
+...
+IF 5 in segment THEN
+    WRITE(2222)
+FI;
+IF 5 + 1 in segment THEN
+    WRITE(3)
+FI;
+
+выведет
+
+2222
+
+и цикл и обычное присваивание работает
+
+i := 3;
+while i in segment do WRITE(i); i := i + 1 od
+
+выведет
+
+3
+4
+5
+
+специально допустим ошибки
+
+seg := [1,]
+
+Reading input from stdin
+Line 16: expression expected.
+Error: syntax error
+
+можно проследить путь
+
+-- "[" --- "1" --- "," ---- [Expr] ...
+                           /                   
+                          /-- [Term] 
+                             /
+                            /-- [Factor]
+                                /
+                               /-- no match for "]" ---X
+
+
+seg := [1,1
+
+Line 19: 'END' found while ] expected.
+Line 20: end of file found while 'END' expected.
+Error: syntax error
+
+
+IF 6 in segment + 1 THEN WRITE(4) FI;
+
+Line 18: '+' or '-' found while 'THEN' expected.
+Error: syntax error
+
+нельзя выполнять числовые операции с отрезком
+
+получилось выполнить спецификацию
+
+Приложение:
+diff --git a/tafy/course/milan/cmilan/src/Makefile b/tafy/course/milan/cmilan/src/Makefile
+index fe098cf..4bd089c 100644
+--- a/tafy/course/milan/cmilan/src/Makefile
++++ b/tafy/course/milan/cmilan/src/Makefile
+@@ -21,3 +21,10 @@ $(EXE): $(OBJS) $(HEADERS)
+ clean:
+ 	-@rm -f $(EXE) $(OBJS)
+ 
++vm: $(EXE)
++	./$< ../test/if.mil | ../../vm/vm/mvm
++	./$< ../test/segment.mil | ../../vm/vm/mvm
++
++c: $(EXE)
++	# ./$< ../test/if.mil
++	./$< ../test/segment.mil
+diff --git a/tafy/course/milan/cmilan/src/parser.cpp b/tafy/course/milan/cmilan/src/parser.cpp
+index c67b27c..1b6081f 100644
+--- a/tafy/course/milan/cmilan/src/parser.cpp
++++ b/tafy/course/milan/cmilan/src/parser.cpp
+@@ -43,11 +43,18 @@ void Parser::statement()
+ 	// Следующей лексемой должно быть присваивание. Затем идет блок expression, который возвращает значение на вершину стека.
+ 	// Записываем это значение по адресу нашей переменной
+ 	if(see(T_IDENTIFIER)) {
+-		int varAddress = findOrAddVariable(scanner_->getStringValue());
++		string varname = scanner_->getStringValue();
+ 		next();
+ 		mustBe(T_ASSIGN);
+-		expression();
+-		codegen_->emit(STORE, varAddress);
++		if(see(T_LBRACKET)) {
++			segment();
++			int pos = findOrAddSegment(varname);
++			codegen_->emit(STORE, pos + 1);
++			codegen_->emit(STORE, pos);
++		} else {
++			expression();
++			codegen_->emit(STORE, findOrAddVariable(varname));
++		}
+ 	}
+ 	// Если встретили IF, то затем должно следовать условие. На вершине стека лежит 1 или 0 в зависимости от выполнения условия.
+ 	// Затем зарезервируем место для условного перехода JUMP_NO к блоку ELSE (переход в случае ложного условия). Адрес перехода
+@@ -103,6 +110,15 @@ void Parser::statement()
+ 	}
+ }
+ 
++void Parser::segment()
++{
++	next();
++	expression();
++	mustBe(T_COMMA);
++	expression();
++	mustBe(T_RBRACKET);
++}
++
+ void Parser::expression()
+ {
+ 
+@@ -226,20 +242,59 @@ void Parser::relation()
+ 				break;
+ 		};
+ 	}
++	else if(see(T_IN)) {
++		next();
++
++		codegen_->emit(DUP); // duplicate expr
++
++		mustBe(T_IDENTIFIER); // TODO accept segment literal
++		int varAddress = findOrAddSegment(scanner_->getStringValue());
++
++		codegen_->emit(LOAD, varAddress);
++		codegen_->emit(COMPARE, 5); // expr >= seg.left
++		codegen_->emit(DUP); // save 0
++
++		int jumpNoAddress = codegen_->reserve();
++
++		codegen_->emit(POP); // dont save 1
++		codegen_->emit(LOAD, varAddress + 1);
++		codegen_->emit(COMPARE, 4); // expr <= seg.right
++
++		codegen_->emitAt(jumpNoAddress, JUMP_NO, codegen_->getCurrentAddress());
++	}
+ 	else {
+ 		reportError("comparison operator expected.");
+ 	}
+ }
+ 
+-int Parser::findOrAddVariable(const string& var)
++int Parser::findOrAddVariable(const string& name)
+ {
+-	VarTable::iterator it = variables_.find(var);
++	VarTable::iterator it = variables_.find(name);
+ 	if(it == variables_.end()) {
+-		variables_[var] = lastVar_;
++		Variable &variable = variables_[name];
++		variable.type = Variable::VarType::number;
++		variable.ram_pos = lastVar_;
+ 		return lastVar_++;
+ 	}
+ 	else {
+-		return it->second;
++		// TODO error for type
++		return it->second.ram_pos;
++	}
++}
++
++int Parser::findOrAddSegment(const string& name)
++{
++	VarTable::iterator it = variables_.find(name);
++	if(it == variables_.end()) {
++		Variable &variable = variables_[name];
++		variable.type = Variable::VarType::segment;
++		variable.ram_pos = lastVar_;
++		lastVar_ += 2;
++		return variable.ram_pos;
++	}
++	else {
++		// TODO error for type
++		return it->second.ram_pos;
+ 	}
+ }
+ 
+diff --git a/tafy/course/milan/cmilan/src/parser.h b/tafy/course/milan/cmilan/src/parser.h
+index 073ab7b..2c8a147 100644
+--- a/tafy/course/milan/cmilan/src/parser.h
++++ b/tafy/course/milan/cmilan/src/parser.h
+@@ -56,11 +56,19 @@ public:
+ 	void parse();	//проводим синтаксический разбор 
+ 
+ private:
+-	typedef map<string, int> VarTable;
++	struct Variable
++	{
++		enum VarType { number, segment };
++		VarType type;
++		int ram_pos;
++	};
++
++	typedef map<string, Variable> VarTable;
+ 	//описание блоков.
+ 	void program(); //Разбор программы. BEGIN statementList END
+ 	void statementList(); // Разбор списка операторов.
+ 	void statement(); //разбор оператора.
++	void segment(); //разбор выражения отрезка (пара чисел)
+ 	void expression(); //разбор арифметического выражения.
+ 	void term(); //разбор слагаемого.
+ 	void factor(); //разбор множителя.
+@@ -106,6 +114,7 @@ private:
+ 	//пока не встретим эту лексему или лексему конца файла.
+ 	int findOrAddVariable(const string&); //функция пробегает по variables_. 
+ 	//Если находит нужную переменную - возвращает ее номер, иначе добавляет ее в массив, увеличивает lastVar и возвращает его.
++	int findOrAddSegment(const string&);
+ 
+ 	Scanner* scanner_; //лексический анализатор для конструктора
+ 	CodeGen* codegen_; //указатель на виртуальную машину
+diff --git a/tafy/course/milan/cmilan/src/scanner.cpp b/tafy/course/milan/cmilan/src/scanner.cpp
+index 29f5474..225b9b5 100644
+--- a/tafy/course/milan/cmilan/src/scanner.cpp
++++ b/tafy/course/milan/cmilan/src/scanner.cpp
+@@ -201,6 +201,22 @@ void Scanner::nextToken()
+ 				arithmeticValue_ = A_MULTIPLY;
+ 				nextChar();
+ 				break;
++
++			case '[':
++				token_ = T_LBRACKET;
++				nextChar();
++				break;
++
++			case ']':
++				token_ = T_RBRACKET;
++				nextChar();
++				break;
++
++			case ',':
++				token_ = T_COMMA;
++				nextChar();
++				break;
++
+ 			//Иначе лексема ошибки.
+ 			default:
+ 				token_ = T_ILLEGAL;
+diff --git a/tafy/course/milan/cmilan/src/scanner.h b/tafy/course/milan/cmilan/src/scanner.h
+index 15d1523..163c3f1 100644
+--- a/tafy/course/milan/cmilan/src/scanner.h
++++ b/tafy/course/milan/cmilan/src/scanner.h
+@@ -29,7 +29,11 @@ enum Token {
+ 	T_CMP,			// Сводная лексема для операторов отношения
+ 	T_LPAREN,		// Открывающая скобка
+ 	T_RPAREN,		// Закрывающая скобка
+-	T_SEMICOLON		// ";"
++	T_SEMICOLON,	// ";"
++	T_LBRACKET,		// Открывающая квадратная скобка
++	T_RBRACKET,		// Закрывающая квадратная скобка
++	T_COMMA,		// ","
++	T_IN			// Символ отношения принадлежности числа отрезку
+ };
+ 
+ // Функция tokenToString возвращает описание лексемы.
+@@ -76,6 +80,7 @@ public:
+ 		keywords_["od"] = T_OD;
+ 		keywords_["write"] = T_WRITE;
+ 		keywords_["read"] = T_READ;
++		keywords_["in"] = T_IN;
+ 
+ 		nextChar();
+ 	}
+diff --git a/tafy/course/milan/cmilan/test/segment.mil b/tafy/course/milan/cmilan/test/segment.mil
+new file mode 100644
+index 0000000..53b9560
+--- /dev/null
++++ b/tafy/course/milan/cmilan/test/segment.mil
+@@ -0,0 +1,12 @@
++BEGIN
++        segment := [1, 5];
++        IF 0 in segment THEN
++                WRITE(1)
++        FI;
++        IF 5 in segment THEN
++                WRITE(2222)
++        FI;
++        IF 6 in segment THEN
++                WRITE(3)
++        FI
++END
