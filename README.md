@@ -8,7 +8,7 @@
 [ipi.txt](ipi.txt)
 ИПИ
 
-kpo
+[kpo](https://github.com/KlyukinSA/kpo)
 КПО
 
 [mo](mo)
