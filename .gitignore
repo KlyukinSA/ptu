@@ -15,6 +15,7 @@
 *.o
 *.out
 *.djvu
+*.mp*
 
 urpo
 arch

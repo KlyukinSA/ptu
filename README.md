@@ -31,25 +31,25 @@
 
 # 7 sem
 
-fiz
+[fiz](fiz)
 РПОМФП
 
 [graph](graph)
 графика
 
-kpp
+[kpp](kpp)
 ОПРКПП
 
 ns
 НС
 
-st
+[st](st)
 СТ
 
 trkpo
 ТРКПО
 
-zi
+[zi](zi)
 ЗИ
 
 pak
