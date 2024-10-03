@@ -2,9 +2,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-# seq = [1, 0, 1, 0, 0, 1, 1, 0]
+seq = [1, 0, 1, 0, 0, 1, 1, 0]
 # seq = [1, 0, 1, 1, 0, 1, 1, 0]
-seq = [1, 0, 1, 1, 1, 0, 1, 1]
+# seq = [1, 0, 1, 1, 1, 0, 1, 1]
 sample = 30
 subs = 6#11
 n = len(seq)
@@ -49,12 +49,12 @@ for xc in 8 * np.arange(n) / n:  # Вертикальные линии
 plt.ylabel('So')
 plt.yticks([])  # Убираем отображение меток по оси Y
 
-# Добавляем график -1 - So
+# Добавляем график -So
 plt.subplot(subs, 2, 4)
-plt.plot(x_normalized, -1 - y_lower)
+plt.plot(x_normalized, -y_lower)
 for xc in 8 * np.arange(n) / n:  # Вертикальные линии
     plt.axvline(x=xc, linestyle='--', color='gray')
-plt.ylabel('-1 - So')
+plt.ylabel('-So')
 plt.yticks([])  # Убираем отображение меток по оси Y
 
 # Добавляем график So * Sk
@@ -114,19 +114,21 @@ plt.ylabel('int(-s0sk)')
 plt.yticks([])  # Убираем отображение меток по оси Y
 plt.ylim(-1.5, 1.5)  # Ограничиваем диапазон по оси Y
 
+none_val = 0 #0.5
 # z^-1
 plt.subplot(subs, 2, 9)
 z = 0
 zs = []
 for i in range(n):
     if i == 0:
-        val = 0.5
+        val = none_val
     elif int_vals[i-1] > 0:
         val = 0
     else:
         val = 1
     zs.extend([val] * sample)
 plt.plot(x_normalized, zs) 
+plt.plot(x_normalized[0:sample], [none_val] * sample, 'r') 
 plt.ylabel('z^-1')
 
 # xor
@@ -135,13 +137,14 @@ z = 0
 zs = []
 for i in range(n):
     if i == 0:
-        val = 0.5
+        val = none_val
     elif int_vals[i-1] > 0:
         val = int(int_vals[i] < 0)
     else:
         val = int(int_vals[i] > 0)
     zs.extend([val] * sample)
 plt.plot(x_normalized, zs) 
+plt.plot(x_normalized[0:sample], [none_val] * sample, 'r') 
 plt.ylabel('xor')
 
 # inv
@@ -150,13 +153,14 @@ z = 0
 zs = []
 for i in range(n):
     if i == 0:
-        val = 0.5
+        val = none_val
     elif int_vals[i-1] > 0:
         val = int(int_vals[i] > 0)
     else:
         val = int(int_vals[i] < 0)
     zs.extend([val] * sample)
 plt.plot(x_normalized, zs) 
+plt.plot(x_normalized[0:sample], [none_val] * sample, 'r') 
 plt.ylabel('inv')
 
 # Показываем графики
