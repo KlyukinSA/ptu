@@ -25,18 +25,94 @@ def TDMA(a, b, c, f):
 
     return x
 
-a = np.array([0, 0, 0])
-b = np.array([0, 0, 0])
-c = np.array([1, 1, 1])
-f = np.array([1, 1, 1])
-x = TDMA(a, b, c, f)
-print(x - np.array([1.0, 1.0, 1.0]))
+if False:
+    a = np.array([0, 0, 0])
+    b = np.array([0, 0, 0])
+    c = np.array([1, 1, 1])
+    f = np.array([1, 1, 1])
+    x = TDMA(a, b, c, f)
+    print(x - np.array([1.0, 1.0, 1.0]))
 
-# Пример вычисления https://scask.ru/i_book_clm.php?id=47
-# но лучше взять со всеми целыми числами
-a = np.array([0, 2, 2, 3])
-b = np.array([-1, -1, -0.8, 0])
-c = np.array([5, 4.6, 3.6, 4.4])
-f = np.array([2, 3.3, 2.6, 7.2])
-x = TDMA(a, b, c, f)
-print(x - np.array([0.5256, 0.628, 0.64, 1.2]))
+    # Пример вычисления https://scask.ru/i_book_clm.php?id=47
+    # но лучше взять со всеми целыми числами
+    a = np.array([0, 2, 2, 3])
+    b = np.array([-1, -1, -0.8, 0])
+    c = np.array([5, 4.6, 3.6, 4.4])
+    f = np.array([2, 3.3, 2.6, 7.2])
+    x = TDMA(a, b, c, f)
+    print(x - np.array([0.5256, 0.628, 0.64, 1.2]))
+
+bl = 0
+br = 1
+N = 10
+wN = N + 1
+h = (br - bl) / N
+def r_1(i):
+    return bl + h * i
+def r_2(i):
+    return r_1(i) + h / 2
+def h_1(i):
+    return h
+def h_2(i):
+    if i % N == 0:
+        return h / 2
+    return h
+
+# def k(r):
+#     return 1
+# def q(r):
+#     return 1
+# def f(r):
+#     return 1
+# u = [1] * wN
+# v2 = u[-1]
+# Xi2 = v2
+
+def k(r):
+    return 3*r
+def q(r):
+    return 4*r+3
+def f(r):
+    return 8*r*r+12*r-9
+u = [2*r_1(i)+1 for i in range(wN)]
+v2 = u[-1]
+Xi2 = 1 - 2 * k(r_1(N)) / v2
+
+def k_2(i):
+    return k(r_2(i))
+def q_1(i):
+    return q(r_1(i))
+def f_1(i):
+    return f(r_1(i))
+a = [0] * wN
+b = [0] * wN
+c = [0] * wN
+g = [0] * wN
+
+# середина
+for i in range(1, N):
+    a[i] = r_2(i - 1) * k_2(i - 1) / h_1(i)
+    c[i] = -(r_2(i - 1) * k_2(i - 1) / h_1(i)
+        + r_2(i) * k_2(i) / h_1(i + 1)
+        + h_2(i) * r_1(i) * q_1(i))
+    b[i] = r_2(i) * k_2(i) / h_1(i + 1)
+    g[i] = -h_2(i) * r_1(i) * f_1(i)
+
+i = 0
+a[i] = 0
+c[i] = h_1(i) * r_2(i) * q_1(i) / 2 \
+    + r_2(i) * k_2(i) / h_1(i + 1)
+b[i] = -r_2(i) * k_2(i) / h_1(i + 1)
+g[i] = h_1(i) * r_2(i) * f_1(i) / 2
+
+i = N
+a[i] = -r_2(i - 1) * k_2(i - 1) / h_1(i)
+c[i] = r_1(i) * Xi2 \
+    + r_2(i - 1) * k_2(i - 1) / h_1(i) \
+    + h_2(i) * r_1(i) * q_1(i)
+b[i] = 0
+g[i] = h_2(i) * r_1(i) * f_1(i) + r_1(i) * v2
+
+x = TDMA(a, b, c, g)
+print(u)
+print(x - np.array(u))

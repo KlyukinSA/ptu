@@ -40,7 +40,7 @@
 [kpp](kpp)
 ОПРКПП
 
-ns
+[ns](ns)
 НС
 
 [st](st)
