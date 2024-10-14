@@ -21,12 +21,16 @@ v2 = np.array([-3, 5])
 # v2 = np.array([5, 19])
 
 rows, cols = period.shape
-w = h = 15
-sequence = np.zeros((rows * w, cols * h), dtype=bool)
+sts = 50
+store=(rows * sts, cols * sts)
+shs = 10
+show =(rows * shs, cols * shs)
+sequence = np.zeros(store, dtype=bool)
 
-s = np.array([rows * w//2, cols * h//2])
-for a in range(-2, 3):
-    for b in range(-2, 3):
+s = np.array(store) // 2
+bs = 7
+for a in range(-bs, bs+1):
+    for b in range(-bs, bs+1):
         x = a * v1 + b * v2
         x[1]*=-1
         x += s
@@ -34,7 +38,23 @@ for a in range(-2, 3):
             for j in range(cols):
                 sequence[x[1] + i, x[0] + j] = period[i, j]
 
-plt.imshow(sequence, cmap='gray', interpolation='nearest')
+sh = np.array(show) // 2
+plt.imshow(sequence[s[0]-sh[0]:s[0]+sh[0], s[1]-sh[1]:s[1]+sh[1]], cmap='gray_r')
+def get_vector_plot(v):
+    return [sh[0], sh[0]+v[0]], [sh[1], sh[1]-v[1]]
+def get_moved_vector_plot(v, base):
+    return [sh[0]+base[0], sh[0]+base[0]+v[0]], [sh[1]-base[1], sh[1]-base[1]-v[1]]
+plt.plot(*get_vector_plot(v1), c='b')
+plt.plot(*get_vector_plot(v2), c='b')
+plt.plot(*get_moved_vector_plot(v2, v1), c='b', linestyle='dashed')
+v3, v4 = -v1, v2 + 2 * v1
+plt.plot(*get_vector_plot(v3), c='r')
+plt.plot(*get_vector_plot(v4), c='r')
+plt.plot(*get_moved_vector_plot(v3, v4), c='r', linestyle='dashed')
+ax = plt.gca()
+ax.set_xticks(np.arange(-.5, show[0], 1))
+ax.set_yticks(np.arange(-.5, show[1], 1))
+ax.grid(color='k', linestyle='-', linewidth=1)
 plt.title('Построенная последовательность')
 plt.show()
 
@@ -43,4 +63,5 @@ plt.show()
 #     if not np.any([np.array_equal(x, y) for y in forbids]):
 #         print(x)
 
-print(-v1, v2 + 2 * v1)
+print(v1+v2, v1-v2, v2-v1)
+print(v3, v4)
