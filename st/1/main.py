@@ -60,3 +60,35 @@ print('вероятность для 3g = 1 - norm.cdf(', threshold, ', ', mean_
 # probability_4g = 1 - norm.cdf(threshold, mean_4g, std_dev_4g)
 probability_4g = prob(mean_4g, std_dev_4g)
 print('вероятность для 4g = 1 - norm.cdf(', threshold, ', ', mean_4g, ', ', std_dev_4g, ') = ', probability_4g, sep='')
+
+# no one has working wifi:
+
+# r.
+# Мощность передатчика точки доступа WiFi 20 дБм
+# Коэффициент усиления антенны точки доступа и WiFi телефона 0 дБ
+a = 0.0006
+def PLfs(d):
+    # Коэффициент усиления антенны точки доступа и WiFi телефона 0 дБ
+    # поэтому -0 -0
+    return -20*log10(a/4*pi*d) - 0 - 0
+def gen_err(mean=0, std_dev=6):
+    return np.random.normal(loc=mean, scale=std_dev)
+def Pl(d):
+    if d <= dvr:
+        x = gen_err(std_dev=3)
+        return PLfs(d), x
+    else:
+        x = gen_err(std_dev=5)
+        return PLfs(dvr) + 3.5*10*log10(d/dvr), x
+
+# https://github.com/Hryapusek/networks-labs/blob/main/main.py
+def calc_G2(f: float, A: float = 5) -> float:
+    l = speed_of_light / f
+    return 4 * pi * A / (l**2)
+def wifi_plfs(d: float, f: float) -> float:
+    l = speed_of_light / f
+    return -20 * log10(l / (4 * pi * d)) - calc_G2(f)
+def wifi_pl__d_less_5(f: float, d: float, x: float) -> float:
+    return wifi_plfs(d, f) + x
+def wifi_pl__d_more_5(f: float, d: float, dbp: float, x: float) -> float:
+    return wifi_plfs(d, f) + 3.5 * 10 * log10(d / dbp) + x
