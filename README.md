@@ -1,5 +1,7 @@
 тут код в основном! отчеты вот https://drive.google.com/drive/folders/1IOIJFAu2wy7CuSaZgksyZtNc2X1HuTyQ?usp=sharing
 
+для запуска python скриптов необходимы библиотеки, указанные в [pip_list.txt](pip_list.txt)
+
 # 6 sem
 
 [arch](arch)
@@ -52,7 +54,7 @@ trkpo
 [zi](zi)
 ЗИ
 
-pak
+[pak](pak)
 РПАК
 
 [oms](oms)

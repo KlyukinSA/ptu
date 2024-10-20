@@ -47,10 +47,12 @@ def get_moved_vector_plot(v, base):
 plt.plot(*get_vector_plot(v1), c='b')
 plt.plot(*get_vector_plot(v2), c='b')
 plt.plot(*get_moved_vector_plot(v2, v1), c='b', linestyle='dashed')
-v3, v4 = -v1, v2 + 2 * v1
+plt.plot(*get_moved_vector_plot(v1, v2), c='b', linestyle='dashed')
+v3, v4 = -v1, -v2 + 2 * v1
 plt.plot(*get_vector_plot(v3), c='r')
 plt.plot(*get_vector_plot(v4), c='r')
 plt.plot(*get_moved_vector_plot(v3, v4), c='r', linestyle='dashed')
+plt.plot(*get_moved_vector_plot(v4, v3), c='r', linestyle='dashed')
 ax = plt.gca()
 ax.set_xticks(np.arange(-.5, show[0], 1))
 ax.set_yticks(np.arange(-.5, show[1], 1))
