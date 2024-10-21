@@ -49,7 +49,7 @@ def pp(x):
 
 bl = 0
 br = 1
-Ns = [4, 8, 16, 32, 64, 128, 256, 512, 1024]
+Ns = [4, 8, 16, 32, 64, 128, 256, 512, 1024]#, 2048, 4000, 8000, 16000, 32000]
 gs = []
 bs = []
 for N in Ns:
@@ -125,15 +125,11 @@ for N in Ns:
         return 3*r
     def q(r):
         return 4*r+3
-    # def f(r):
-    #     return 8*r*r+12*r-9
     def f(r):
         return q(r)
-    # u = [2*r_1(i)+1 for i in range(wN)]
     u = [1 for i in range(wN)]
-    v2 = u[-1]
-    # Xi2 = 1 - 2 * k(r_1(N)) / v2
     Xi2 = 1
+    v2 = 1
     tones(gs)
 
     def k(r):
@@ -143,18 +139,13 @@ for N in Ns:
     def f(r):
         return 2*r**3+2*r**2-6*r-4
     u = [r_1(i)**2 for i in range(wN)]
-    v2 = u[-1]
-    Xi2 = -1 - 2 / br
+    Xi2 = 1
+    v2 = 3*br*br + 2*br
     tones(bs)
-
-    # for u, k, q, f, Xi in [(lambda r: 1, lambda r: 1, lambda r: 1, lambda r: 1, lambda r: 1),
-    #     (lambda r: 2*r+1, lambda r: 3*r, lambda r: 4*r+3, lambda r: 8*r*r+12*r-9)]:
-    #     u = [u(r_1(i)) for i in range(wN)]
-    #     v2 = u[-1]
 
 if False:
     plt.plot(Ns, gs)
-    plt.ylabel('без погрешности СЛАУ')
+    plt.ylabel('без погрешности РС')
     plt.show()
     plt.plot(Ns, bs)
     plt.ylabel('с ней')
@@ -167,6 +158,7 @@ for val in gs:
 print()
 for val in bs:
     pp(val)
+print()
 
 for i in range(len(Ns) - 1):
     pp(gs[i] / gs[i+1])
