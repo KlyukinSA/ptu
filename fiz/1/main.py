@@ -43,6 +43,7 @@ if False:
     f = np.array([2, 3.3, 2.6, 7.2])
     x = TDMA(a, b, c, f)
     print(x - np.array([0.5256, 0.628, 0.64, 1.2]))
+    exit()
 
 def pp(x):
     print("%0.1E" % x)
@@ -77,7 +78,11 @@ for N in Ns:
         b = [0] * wN
         c = [0] * wN
         g = [0] * wN
-
+        # a = np.array([0] * wN, dtype=float32)
+        # b = np.array([0] * wN, dtype=float32)
+        # c = np.array([0] * wN, dtype=float32)
+        # g = np.array([0] * wN, dtype=float32)
+        
         # середина
         for i in range(1, N):
             a[i] = r_2(i - 1) * k_2(i - 1) / h_1(i)
@@ -92,7 +97,7 @@ for N in Ns:
         c[i] = h_1(i) * r_2(i) * q_1(i) / 2 \
             + r_2(i) * k_2(i) / h_1(i + 1)
         b[i] = -r_2(i) * k_2(i) / h_1(i + 1)
-        g[i] = h_1(i) * r_2(i) * f_1(i) / 2
+        g[i] = h_2(i) * r_2(i) * f_1(i) / 2
 
         i = N
         a[i] = -r_2(i - 1) * k_2(i - 1) / h_1(i)
@@ -151,18 +156,18 @@ if False:
     plt.ylabel('с ней')
     plt.show()
 
-for n in Ns:
-    print(n)
-for val in gs:
-    pp(val)
-print()
-for val in bs:
-    pp(val)
-print()
-
+gfs = []
 for i in range(len(Ns) - 1):
-    pp(gs[i] / gs[i+1])
+    gfs.append(gs[i] / gs[i+1])
     
-print()
+bfs = []
 for i in range(len(Ns) - 1):
-    pp(bs[i] / bs[i+1])
+    bfs.append(bs[i] / bs[i+1])
+
+def print_table(a1, a2, f):
+    for n, v1, v2 in zip(Ns, a1, a2):
+        print(n, '&', f % v1, '&', f % v2, "\\\\")
+
+print_table(gs, bs, "%0.1E")
+print()
+print_table(gfs, bfs, "%0.1f")

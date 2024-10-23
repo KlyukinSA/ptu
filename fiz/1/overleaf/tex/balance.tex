@@ -1,0 +1,55 @@
+\subsection{Интегро-интеполяционный метод (метод баланса)}
+
+Введем основную сетку, где N - число разбиений.
+\[r_0 < r_1 < \dots < r_N,\ r_i \in [0, R],\ r_0 = 0,\ r_N = R\]
+\[
+  h_i =r_i - r_{i-1},\ i=1,2, \dots, N
+\]
+\[
+  r_{r-0.5} = \frac{r_i - r_{i-1}}{2},\ i=1,2, \dots, N
+\]
+Введем дополнительную сетку:
+\[
+  \hbar_i = \begin{cases}
+    \frac{h_i + 1}{2},\ i = 0 \\ \\
+    \frac{h_i + h_{i+1}}{2},\ i = 1, 2, \dots, N-1 \\ \\
+    \frac{h_i}{2},\ i = N
+  \end{cases}
+\]
+Проведем аппроксимацию начального уравнения.
+
+Получаем разностную схему для i = 0:
+\[
+  -\left[ r_{i+0.5} \cdot k_{i+0.5}\frac{v_{i+1}-v_i}{h_{i+1}} - \frac{r_{i+0.5} h_i q_i v_i}{2} \right]\ =\ \frac{\hbar_i r_{i+0.5} f_i}{2}
+\]
+
+Получаем разностную схему для i\ =\ 1, 2, \dots, N-1:
+\[
+  -\left[ r_{i+0.5} \cdot k_{i+0.5}\frac{v_{i+1}-v_i}{h_{i+1}} - r_{i-0.5}k_{i-0.5}\frac{v_{i}\ -\ v_{i-1}}{h_{i}} - \hbar r_i q_i v_i\right]\ =\ \hbar_ir_if_i
+\]
+
+Получаем разностную схему для i=N:
+\[
+  -\left[ r_i (-\chi v_i + \nu) - r_{i-0.5}k_{i-0.5} \cdot \frac{v_i-v_{i-1}}{h_i}- \hbar_ir_iq_iv_i \right]\ =\ \hbar_ir_if_i
+\]
+
+После аппроксимации уравнения можно представить в виде системы из трёхдиагональной матрицы где a, c, b - диагонали матрица A и вектора g. Элементы матрицы:\newline
+Для i\ =\ 0
+\begin{align*}
+  c_i = \frac{h_i r_{i+0.5} q_i}{2} + \frac{r_{i+0.5} k_{i+0.5}}{h_{i+1}} \quad
+  b_i = -r_{i+0.5} \cdot \frac{k_{i+0.5}}{h_{i+1}} \quad
+  g_i = \frac{\hbar_i r_i f_i}{2}
+\end{align*}
+Для i\ =\ 1, 2, \dots, N-1
+\begin{align*}
+  a_i &= -r_{i-0.5}\frac{k_{i-0.5}}{h_i} \quad
+  c_i = r_{i-0.5}\frac{k_{i-0.5}}{h_i} + r_{i+0.5}\frac{k_{i+0.5}}{h_{i+1}} + \hbar_i r_iq_i \quad
+  b_i = -r_{i+0.5}\frac{k_{i+0.5}}{h_{i+1}} \\
+  g_i &= \hbar_i r_i f_i
+\end{align*}
+Для i\ =\ N:
+\begin{align*}
+  a_i = -r_{i-0.5}\frac{k_{i-0.5}}{h_i} \quad
+  c_i = \chi r_i + r_{i-0.5}\frac{k_{i-0.5}}{h_i} + \hbar_i r_iq_i \quad
+  g_i = \hbar_i r_i f_i + \nu r_i
+\end{align*}

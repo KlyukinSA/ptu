@@ -1,0 +1,126 @@
+\subsection{Оценка погрешности}
+
+\subsubsection{Невязка разностной схемы}
+
+\[
+  Av = g;\ A - (N + 1) \cdot (N + 1); v, g \in R^{(N + 1)}
+\]
+
+Пусть $ v $ - это точное решение разностной схемы, $ u $ -  точное решение дифференциального уравнения, 
+$ \tilde{v} $ - полученное решение разностной схемы.
+
+Ищем погрешность решения разностной схемы:
+\[
+  \varepsilon = \tilde{v} - u
+\]
+
+Введем обозначения:
+\begin{itemize}
+  \item Погрешность решения системы линейных алгебраических уравнений
+  \[ z = \tilde{v} - v \]
+  \item Погрешность от аппроксимации дифференциального уравнения разностной схемой
+  \[ \zeta = v - u \]
+  \item Невязка разностной схемы
+  \[ \xi = g - Au \]
+  \item Невязка алгебраической системы
+  \[ r = g - A\tilde{v} \]
+\end{itemize}
+
+\subsubsection{Структура погрешности разностной схемы}
+\[
+  \left\lVert \varepsilon \right\rVert = \left\lVert \tilde{v} - u \right\rVert =
+  \left\lVert \tilde{v} - v + v - u \right\rVert = \left\lVert z + \zeta  \right\rVert \leq \left\lVert z \right\rVert
+  + \left\lVert \zeta \right\rVert 
+\]
+
+Для $\left\lVert \zeta\right\rVert$:
+\[
+  \xi = g - Au = A(A^{-1}g - u) = A(v - u)
+\]
+\[
+  A\zeta  = \xi
+\]
+
+Тем самым погрешность от аппроксимации дифференциального уравнения разностной схемой, связана с невязкой разностной схемы:
+\[
+  \zeta = A^{-1} \xi 
+\]
+
+Для $\left\lVert z \right\rVert$:
+\[
+  r = g - A\tilde{v} = A(A^{-1}g - \tilde{v}) = A(v - \tilde{v})
+\]
+\[
+  Az = r
+\]
+Тем самым погрешность решения системы линейных алгебраических уравнений, связана с невязкой алгебраической системы:
+\[
+  z = A^{-1}r
+\]
+
+Подставим в наше неравенство, тем самым получаем:
+\[
+  \left\lVert \varepsilon \right\rVert \leq \left\lVert A^{-1}r \right\rVert + \left\lVert A^{-1}\xi \right\rVert
+  \leq \left\lVert A^{-1} \right\rVert ( \left\lVert r \right\rVert  + \left\lVert \xi \right\rVert)
+  \quad \left\lVert A^{-1}\right\rVert  < C
+\]
+
+\subsubsection{Вклад от погрешности решения системы алгебраических уравнений}
+\[
+  \left\lVert z \right\rVert \leq \left\lVert A^{-1} \right\rVert \left\lVert r \right\rVert =
+  \left\lVert A \right\rVert \left\lVert A^{-1} \right\rVert \frac{\left\lVert r \right\rVert }{\left\lVert A \right\rVert } 
+\]
+
+Знаем что:
+\[
+  \left\lVert A \right\rVert \geq \frac{\left\lVert g \right\rVert }{\left\lVert v\right\rVert }
+\]
+
+Из этого получаем:
+\[
+  \left\lVert z \right\rVert \leq \left\lVert A \right\rVert \left\lVert A^{-1} \right\rVert
+  \frac{\left\lVert r \right\rVert }{\left\lVert A \right\rVert } \left\lVert v \right\rVert 
+\]
+\[
+  cond(A) = \left\lVert A \right\rVert \left\lVert A^{-1} \right\rVert
+\]
+\[
+  \frac{\left\lVert r \right\rVert }{\left\lVert A \right\rVert } \sim \varepsilon_{M}
+\]
+
+
+\[
+  \left\lVert z \right\rVert \leq cond(A) \varepsilon_{M} \left\lVert v \right\rVert 
+\]
+
+\subsubsection{Разложение невязки}
+
+Введём букву n = 1.
+
+Граничное условие слева:
+\begin{center}
+  \includegraphics[width=0.7\textwidth]{img/ei0.png}
+\end{center}
+p = 2 - 0 = 2
+
+Граничное условие справа:
+\begin{center}
+  \includegraphics[width=0.7\textwidth]{img/eiN.png}
+\end{center}
+Второе слагаемое из условия равно нулю.
+p = 2 - 0 = 2
+
+Основное уравнение:
+\begin{center}
+  \includegraphics[width=0.7\textwidth]{img/emid.png}
+\end{center}
+p = 3 - 1 = 2
+
+\subsubsection{Зависимость погрешности от числа разбиений}
+
+Выходит, что во всех случаях невязка $\left\lVert \xi \right\rVert \sim h^2$. А вот  погрешность решения системы алгебраических уравнений $ \left\lVert z \right\rVert \sim \frac{1}{h^2} $.
+\begin{center}
+  \includegraphics[width=0.7\textwidth]{img/err.pdf}
+\end{center}
+
+Значит существует такое число разбиений где погрешность минимальная.

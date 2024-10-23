@@ -1,0 +1,145 @@
+\subsection{Метод прогонки}
+
+Метод прогонки это простой способ решать трёхдиагональные системы.
+\begin{align*}
+  \begin{pmatrix}
+    c_1 & b_1 & &  &  &  & 0 \\
+    a_2 & c_2 & b_2 &  & & & \\
+     &   \ddots & \ddots & \ddots & & & \\
+     & &  \ddots & \ddots & \ddots & &  \\
+     & & & \ddots & \ddots & \ddots &  \\
+     &  &  & & a_{n-1} & c_{n-1} & b_{n-1} \\
+     0 & & & &  &a_n & c_n
+  \end{pmatrix}
+  \begin{pmatrix}
+    x_1 \\
+    x_2 \\
+    \vdots \\
+    \vdots \\
+    \vdots \\
+    x_{n-1} \\
+    x_n
+  \end{pmatrix} =
+  \begin{pmatrix}
+    g_1 \\
+    g_2 \\
+    \vdots \\
+    \vdots \\
+    \vdots \\
+    g_{n-1} \\
+    g_n
+  \end{pmatrix}
+\end{align*}
+\subsubsection*{Этап 1}
+\textbf{Строка 1.} Разделим первую строку на $c_1$:
+\begin{align*}
+  &c_1 x_1+b_1x_2 = g_1 \\
+  &x_1 + \textcolor{red}{\gamma_1} x_2 = \textcolor{red}{\rho_1},\ \gamma_1 = \frac{b_1}{c_1},\ \rho_1 = \frac{g_1}{c_1}
+\end{align*}
+\begin{align*}
+  \begin{pmatrix}
+    \textcolor{red}{1} & \textcolor{red}{\gamma_1} & &  &  &  & 0 \\
+    a_2 & c_2 & b_2 &  & & & \\
+     &   \ddots & \ddots & \ddots & & & \\
+     & &  \ddots & \ddots & \ddots & &  \\
+     & & & \ddots & \ddots & \ddots &  \\
+     &  &  & & a_{n-1} & c_{n-1} & b_{n-1} \\
+     0 & & & &  &a_n & c_n
+  \end{pmatrix}
+  \begin{pmatrix}
+    x_1 \\
+    x_2 \\
+    \vdots \\
+    \vdots \\
+    \vdots \\
+    x_{n-1} \\
+    x_n
+  \end{pmatrix} =
+  \begin{pmatrix}
+    \textcolor{red}{\rho_1} \\
+    g_2 \\
+    \vdots \\
+    \vdots \\
+    \vdots \\
+    g_{n-1} \\
+    g_n
+  \end{pmatrix}
+\end{align*}
+\textbf{Строки от 2 до N-1}. Здесь представлена общая формула для всех строк в промежутке
+\[	a_n x_{n-1} + c_n x_n + b_n x_{n + 1} = g_n,\ n = 2, 3, \dots, N-1 \]
+Умножим n-1 строку на $a_n$ и вычтем из строки под номером n. Получим строку
+\[ (c_n - a_n \cdot \textcolor{red}{\gamma_{n-1}})x_n + c_n x_{n + 1} = g_n - a_n \textcolor{red}{\rho_{n - 1}} \]
+Разделим на $ (c_n - a_n \cdot \gamma_{n-1}) $
+\[	x_n + \frac{b_n}{c_n - a_n \gamma_{n-1}} x_{n+1} = \frac{g_n - a_n \rho_{n-1}}{c_n - a_n\gamma_{n-1}} \]
+\[	x_n + \textcolor{red}{\gamma_n} x_{n+1} = \textcolor{red}{\rho_n},\ \gamma_n = \frac{b_n}{c_n - a_n\gamma_{n-1}},\ \rho_n = \frac{g_n - a_n\rho_{n-1}}{c_n-a_n\gamma_{n-1}} \]
+
+\begin{align*}
+  \begin{pmatrix}
+    \textcolor{red}{1} & \textcolor{red}{\gamma_1} & &  &  &  & 0 \\
+    0 & \textcolor{red}{1} & \textcolor{red}{\gamma_2} &  & & & \\
+     &   \ddots & \ddots & \ddots & & & \\
+     & &  \ddots & \ddots & \ddots & &  \\
+     & & & \ddots & \ddots & \ddots &  \\
+     &  &  & & a_{n-1} & c_{n-1} & b_{n-1} \\
+     0 & & & &  &a_n & c_n
+  \end{pmatrix}
+  \begin{pmatrix}
+    x_1 \\
+    x_2 \\
+    \vdots \\
+    \vdots \\
+    \vdots \\
+    x_{n-1} \\
+    x_n
+  \end{pmatrix} =
+  \begin{pmatrix}
+    \textcolor{red}{\rho_1} \\
+    \textcolor{red}{\rho_2} \\
+    \vdots \\
+    \vdots \\
+    \vdots \\
+    g_{n-1} \\
+    g_n
+  \end{pmatrix}
+\end{align*}
+\newline
+\textbf{Строка N.}
+\begin{align*}
+  &a_n x_{n-1} + c_n x_n = g_n \\
+  &x_n= \textcolor{red}{\rho_n},\ \rho_n=\frac{r_n - a_n \rho_{n-1}}{c_n -a_n \gamma_{n-1}}
+\end{align*}
+\begin{align*}
+  \begin{pmatrix}
+    \textcolor{red}{1} & \textcolor{red}{\gamma_1} & &  &  &  & 0 \\
+    0 & \textcolor{red}{1} & \textcolor{red}{\gamma_2} &  & & & \\
+     &   \ddots & \ddots & \ddots & & & \\
+     & &  \ddots & \ddots & \ddots & &  \\
+     & & & \ddots & \ddots & \ddots &  \\
+     &  &  & & \textcolor{red}{0} & \textcolor{red}{1} & \textcolor{red}{\gamma_{n-1}} \\
+     0 & & & &  & \textcolor{red}{0} & \textcolor{red}{1}
+  \end{pmatrix}
+  \begin{pmatrix}
+    x_1 \\
+    x_2 \\
+    \vdots \\
+    \vdots \\
+    \vdots \\
+    x_{n-1} \\
+    x_n
+  \end{pmatrix} =
+  \begin{pmatrix}
+    \textcolor{red}{\rho_1} \\
+    \textcolor{red}{\rho_2} \\
+    \vdots \\
+    \vdots \\
+    \vdots \\
+    \textcolor{red}{\rho_{n-1}} \\
+    \textcolor{red}{\rho_n}
+  \end{pmatrix}
+\end{align*}
+\subsubsection*{Этап 2}
+Чтобы узнать значения вектора x нам нужно "подняться"\ по уже вычисленным значеням.
+\begin{align*}
+  &x_n= \textcolor{red}{\rho_n} \\
+  &x_i = \textcolor{red}{\rho_i - \gamma_{i} x_{i+1}},\ i= n-1, n-2, \dots, 1
+\end{align*}
