@@ -20,7 +20,7 @@
 
 Получаем разностную схему для i = 0:
 \[
-  -\left[ r_{i+0.5} \cdot k_{i+0.5}\frac{v_{i+1}-v_i}{h_{i+1}} - \frac{r_{i+0.5} h_i q_i v_i}{2} \right]\ =\ \frac{\hbar_i r_{i+0.5} f_i}{2}
+  -\left[ r_{i+0.5} \cdot k_{i+0.5}\frac{v_{i+1}-v_i}{h_{i+1}} - \frac{r_{i+0.5} \hbar_i q_i v_i}{2} \right]\ =\ \frac{\hbar_i r_{i+0.5} f_i}{2}
 \]
 
 Получаем разностную схему для i\ =\ 1, 2, \dots, N-1:
@@ -36,7 +36,7 @@
 После аппроксимации уравнения можно представить в виде системы из трёхдиагональной матрицы где a, c, b - диагонали матрица A и вектора g. Элементы матрицы:\newline
 Для i\ =\ 0
 \begin{align*}
-  c_i = \frac{h_i r_{i+0.5} q_i}{2} + \frac{r_{i+0.5} k_{i+0.5}}{h_{i+1}} \quad
+  c_i = \frac{\hbar_i r_{i+0.5} q_i}{2} + \frac{r_{i+0.5} k_{i+0.5}}{h_{i+1}} \quad
   b_i = -r_{i+0.5} \cdot \frac{k_{i+0.5}}{h_{i+1}} \quad
   g_i = \frac{\hbar_i r_i f_i}{2}
 \end{align*}

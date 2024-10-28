@@ -14,7 +14,7 @@ def TDMA(a, b, c, f):
     alpha = [-b[0] / c[0]]
     beta = [f[0] / c[0]]
     n = len(f)
-    x = [0]*n
+    x = np.array([0] * n, dtype='float32')
 
     for i in range(1, n):
         alpha.append(-b[i]/(a[i]*alpha[i-1] + c[i]))
@@ -50,7 +50,7 @@ def pp(x):
 
 bl = 0
 br = 1
-Ns = [4, 8, 16, 32, 64, 128, 256, 512, 1024]#, 2048, 4000, 8000, 16000, 32000]
+Ns = [4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192]#, 16000, 32000]
 gs = []
 bs = []
 for N in Ns:
@@ -66,7 +66,10 @@ for N in Ns:
         if i % N == 0:
             return h / 2
         return h
-
+    # print([r_1(i) for i in range(wN)])
+    # print([r_2(i) for i in range(wN)])
+    # print([h_1(i) for i in range(wN)])
+    # print([h_2(i) for i in range(wN)])
     def tones(vals):
         def k_2(i):
             return k(r_2(i))
@@ -74,14 +77,10 @@ for N in Ns:
             return q(r_1(i))
         def f_1(i):
             return f(r_1(i))
-        a = [0] * wN
-        b = [0] * wN
-        c = [0] * wN
-        g = [0] * wN
-        # a = np.array([0] * wN, dtype=float32)
-        # b = np.array([0] * wN, dtype=float32)
-        # c = np.array([0] * wN, dtype=float32)
-        # g = np.array([0] * wN, dtype=float32)
+        a = np.array([0] * wN, dtype='float32')
+        b = np.array([0] * wN, dtype='float32')
+        c = np.array([0] * wN, dtype='float32')
+        g = np.array([0] * wN, dtype='float32')
         
         # середина
         for i in range(1, N):
@@ -94,7 +93,7 @@ for N in Ns:
 
         i = 0
         a[i] = 0
-        c[i] = h_1(i) * r_2(i) * q_1(i) / 2 \
+        c[i] = h_2(i) * r_2(i) * q_1(i) / 2 \
             + r_2(i) * k_2(i) / h_1(i + 1)
         b[i] = -r_2(i) * k_2(i) / h_1(i + 1)
         g[i] = h_2(i) * r_2(i) * f_1(i) / 2
@@ -106,25 +105,18 @@ for N in Ns:
             + h_2(i) * r_1(i) * q_1(i)
         b[i] = 0
         g[i] = h_2(i) * r_1(i) * f_1(i) + r_1(i) * v2
-
+        # print(a)
+        # print(b)
+        # print(c)
+        # print(g)
         x = TDMA(a, b, c, g)
         # print(u)
-        r = x - np.array(u)
+        r = x - np.array(u, dtype='float32')
         # print(r.dtype)
+        # print(r)
         val = abs(max(r.min(), r.max(), key=abs))
         vals.append(val)
         # pp(N, val)
-
-    # def k(r):
-    #     return 1
-    # def q(r):
-    #     return 1
-    # def f(r):
-    #     return 1
-    # u = [1] * wN
-    # v2 = u[-1]
-    # Xi2 = v2
-    # tones()
 
     def k(r):
         return 3*r
@@ -148,6 +140,17 @@ for N in Ns:
     v2 = 3*br*br + 2*br
     tones(bs)
 
+    # def k(r): # 1.0
+    #     return 2*r*r+1
+    # def q(r):
+    #     return r+1
+    # def f(r):
+    #     return r**3-16*r**2+r-4
+    # u = [r_1(i)**2 for i in range(wN)]
+    # Xi2 = 1
+    # v2 = 4*br**3 + br*br + 2*br
+    # tones(bs)
+
 if False:
     plt.plot(Ns, gs)
     plt.ylabel('без погрешности РС')
@@ -156,18 +159,20 @@ if False:
     plt.ylabel('с ней')
     plt.show()
 
-gfs = []
-for i in range(len(Ns) - 1):
-    gfs.append(gs[i] / gs[i+1])
-    
-bfs = []
-for i in range(len(Ns) - 1):
-    bfs.append(bs[i] / bs[i+1])
+if True:
+    # gfs = []
+    # for i in range(len(Ns) - 1):
+    #     gfs.append(gs[i] / gs[i+1])
+        
+    bfs = []
+    for i in range(len(Ns) - 1):
+        bfs.append(bs[i] / bs[i+1])
 
-def print_table(a1, a2, f):
-    for n, v1, v2 in zip(Ns, a1, a2):
-        print(n, '&', f % v1, '&', f % v2, "\\\\")
+    def print_table(a1, a2, f):
+        for n, v1, v2 in zip(Ns, a1, a2):
+            print(n, '&', f % v1, '&', f % v2, "\\\\")
 
-print_table(gs, bs, "%0.1E")
-print()
-print_table(gfs, bfs, "%0.1f")
+    print_table(gs, bs, "%0.1E")
+    print()
+    for n, v1, in zip(Ns, bfs):
+        print(n, '&', "%0.1f" % v1, "\\\\")
