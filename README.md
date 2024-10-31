@@ -59,3 +59,6 @@ trkpo
 
 [oms](oms)
 ЦОМС
+
+![deftones](https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpm1.narvii.com%2F6060%2Ffeb30541fd4b866c7804686a32c2a73b9a980bfb_hq.jpg&f=1&nofb=1&ipt=e1211f78da741946550f0a8e3bcb1458cc2bbeec6a5b7b6ccbfc866ecdceb39c&ipo=images)
+<!-- ![deftones](https://i.redd.it/d8gwtg0tlvfc1.jpeg) -->
