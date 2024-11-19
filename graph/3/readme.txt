@@ -1,9 +1,3 @@
-use as base:
+да, это изменения. прямо как в коммитах. то это это не весь файл а только изменение.
 
-https://github.com/ax-va/PyOpenGL-Pygame-Stemkoski-Pascale-2021
-
-i used fork:
-
-https://github.com/Linermao/Pyopengl_Cookbook
-
-idk if it differs
+в данном случае взят файл `py3d/examples/example-6-5-shadows.py` из репозитория https://github.com/ax-va/PyOpenGL-Pygame-Stemkoski-Pascale-2021 и туда добавлены мои фигуры
