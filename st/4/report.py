@@ -1,36 +1,40 @@
 M = 1 # бит
 T = 1 # секунд за бит
 ks = [4, 11, 7, 5, 26, 21, 16, 11, 6, 57, 51, 45, 39, 36, 30, 24, 18]
-remain_data_lines_count = 14
-
-result_path = 'resultc.csv' # ';' not work
+ks = [ks[index] for index in [0, 1,2,3, 4,5,6, 9,10,11]]
+prob_thresh = 1e-5
+result_path = 'full/full_result2с.csv' # ','-separated. ';' not work
 separator = ','
-def has_few_errors(tokens, p):
-	# return tokens[-2] == '"0"' or tokens[-2] == '"1"'
-	return p <= 1e-6
 
 
 def get_prob(tokens):
 	return float(tokens[-2].replace('"', '')) / float(tokens[-1].replace('"', ''))
-
 print('table 1')
-def print_table1_row(line, p):
-	print(line[:-1] + separator + "%0.1e" % p)
 file = open(result_path, 'r')
 prev = True
 fzs = []
+pn = '-1'
+t2 = []
 for i, line in enumerate(file):
 	tokens = line.split(separator)
 	p = get_prob(tokens)
-	zero = has_few_errors(tokens, p)
-	if zero and prev:
-		print_table1_row(line, p)
-		fzs.append((tokens, i))
-		prev = False
-	if not zero and not prev:
-		prev = True
-	if prev:
-		print_table1_row(line, p)
+	gave_few_errors = p <= prob_thresh
+	prob_view = "%0.1e" % p
+	if gave_few_errors:
+		prob_view = '"p <= ' + str(prob_thresh) + '"'
+	k = ks[i % len(ks)]
+	print(line[:-1], prob_view, k, sep=separator)
+	cn = tokens[0].replace('"', '')
+	if cn != pn and gave_few_errors:
+		pn = cn
+		fzs.append((tokens, k))
+		t2.append((tokens[1].replace('"', ''), int(cn), k))
+
+print('table 2')
+for p, n, k in t2:
+	h = n - k
+	print(p, n, h, sep=separator)
+
 
 def get_code_redundancy(n, k):
 	return (n - k) / n
@@ -38,13 +42,11 @@ def get_code_redundancy(n, k):
 def get_file_transfer_time(n, k, N_c, N):
 	return (M / k) * n * T * N / N_c
 
-print('table 2')
+print('table 3')
 a = []
-for tokens, i in fzs:
+for tokens, k in fzs:
 	p = tokens[1].replace('"', '')
 	n = int(tokens[0].replace('"', ''))
-	k = ks[i % remain_data_lines_count]
-
 	N_c = int(tokens[3].replace('"', ''))
 	N = int(tokens[-1].replace('"', ''))
 	
@@ -54,7 +56,7 @@ for tokens, i in fzs:
 	print(*line, sep=separator)
 	a.append(line)
 
-print('table 3')
+print('table 4')
 p = -1
 ps = []
 for l in a:
