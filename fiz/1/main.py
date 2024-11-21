@@ -45,9 +45,6 @@ if False:
     print(x - np.array([0.5256, 0.628, 0.64, 1.2]))
     exit()
 
-def pp(x):
-    print("%0.1E" % x)
-
 bl = 0
 br = 1
 Ns = [4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192]#, 16000, 32000]
@@ -66,10 +63,7 @@ for N in Ns:
         if i % N == 0:
             return h / 2
         return h
-    # print([r_1(i) for i in range(wN)])
-    # print([r_2(i) for i in range(wN)])
-    # print([h_1(i) for i in range(wN)])
-    # print([h_2(i) for i in range(wN)])
+
     def tones(vals):
         def k_2(i):
             return k(r_2(i))
@@ -82,7 +76,6 @@ for N in Ns:
         c = np.array([0] * wN, dtype='float32')
         g = np.array([0] * wN, dtype='float32')
         
-        # середина
         for i in range(1, N):
             a[i] = r_2(i - 1) * k_2(i - 1) / h_1(i)
             c[i] = -(r_2(i - 1) * k_2(i - 1) / h_1(i)
@@ -105,21 +98,13 @@ for N in Ns:
             + h_2(i) * r_1(i) * q_1(i)
         b[i] = 0
         g[i] = h_2(i) * r_1(i) * f_1(i) + r_1(i) * v2
-        # print(a)
-        # print(b)
-        # print(c)
-        # print(g)
         x = TDMA(a, b, c, g)
-        # print(u)
         r = x - np.array(u, dtype='float32')
-        # print(r.dtype)
-        # print(r)
         val = abs(max(r.min(), r.max(), key=abs))
         vals.append(val)
-        # pp(N, val)
 
     def k(r):
-        return 3*r
+        return 3*r+2
     def q(r):
         return 4*r+3
     def f(r):
@@ -140,17 +125,6 @@ for N in Ns:
     v2 = 3*br*br + 2*br
     tones(bs)
 
-    # def k(r): # 1.0
-    #     return 2*r*r+1
-    # def q(r):
-    #     return r+1
-    # def f(r):
-    #     return r**3-16*r**2+r-4
-    # u = [r_1(i)**2 for i in range(wN)]
-    # Xi2 = 1
-    # v2 = 4*br**3 + br*br + 2*br
-    # tones(bs)
-
 if False:
     plt.plot(Ns, gs)
     plt.ylabel('без погрешности РС')
@@ -160,10 +134,6 @@ if False:
     plt.show()
 
 if True:
-    # gfs = []
-    # for i in range(len(Ns) - 1):
-    #     gfs.append(gs[i] / gs[i+1])
-        
     bfs = []
     for i in range(len(Ns) - 1):
         bfs.append(bs[i] / bs[i+1])
