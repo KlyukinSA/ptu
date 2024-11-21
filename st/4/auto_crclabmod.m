@@ -1,6 +1,5 @@
 probs = [0.05 0.01 0.005];
-% params = [7 "[3; 1; 0]";
-%     15 "[4; 1; 0]"];
+
 params = [7 "[3; 1; 0]";
     15 "[4; 1; 0]";
     15 "[8; 7; 6; 4; 0]";
@@ -8,30 +7,36 @@ params = [7 "[3; 1; 0]";
     31 "[5; 2; 0]";
     31 "[10; 9; 8; 6; 5; 3; 0]";
     31 "[15; 11; 10; 9; 8; 7; 5; 3; 2; 1; 0]";
-    31 "[20; 18; 17; 13; 10; 9; 7; 6; 4; 2; 0]";
-    31 "[25; 24; 21; 19; 18; 16; 15; 14; 13; 11; 9; 5; 2; 0]";
+
+    % 31 "[20; 18; 17; 13; 10; 9; 7; 6; 4; 2; 0]";
+    % 31 "[25; 24; 21; 19; 18; 16; 15; 14; 13; 11; 9; 5; 2; 0]";
+
     63 "[6; 1; 0]";
     63 "[12; 10; 8; 5; 4; 3; 0]";
     63 "[18; 17; 16; 15; 9; 7; 6; 3; 2; 1; 0]";
-    63 "[24; 23; 22; 20; 19; 17; 16; 13; 10; 9; 8; 6; 5; 4; 2; 1; 0]";
-    63 "[27; 22; 21; 19; 18; 17; 15; 8; 4; 1; 0]"]
+
+    % 63 "[24; 23; 22; 20; 19; 17; 16; 13; 10; 9; 8; 6; 5; 4; 2; 1; 0]";
+    % 63 "[27; 22; 21; 19; 18; 17; 15; 8; 4; 1; 0]";
     % Error in 'crclabmod2/CRC Syndrome Detector': Only generator polynomials of degree 32 or less are allowed.
     % 63 "[33; 32; 30; 29; 28; 27; 26; 23; 22; 20; 15; 14; 13; 11; 9; 8; 6; 5; 2; 1; 0]";
     % 63 "[39; 38; 37; 36; 34; 33; 31; 28; 27; 25; 23; 22; 17; 11; 8; 5; 0]";
-    % 63 "[45; 43; 42; 41; 40; 37; 36; 31; 29; 28; 26; 24; 21; 19; 16; 15; 14; 12; 9; 8; 7; 6; 4; 2; 0]"]
-% return
+    % 63 "[45; 43; 42; 41; 40; 37; 36; 31; 29; 28; 26; 24; 21; 19; 16; 15;
+    % 14; 12; 9; 8; 7; 6; 4; 2; 0]";
+];
+
 TableData = {'0', '0', '0', '0', '0', '0', '0'};
 assignin('base', 'TableData', TableData);
 
-for i = 1:3
-    for j = 1:14
+for i = 1:length(probs)
+    for j = 1:length(params)
+        j
         dsize = str2num(params(j, 1));
         assignin('base', 'dsize', dsize);
         oneprob = probs(i);
         assignin('base', 'oneprob', oneprob);
         genpoly = str2num(params(j, 2));
         assignin('base', 'genpoly', genpoly);
-        blocksToStop = 1000000;
+        blocksToStop = 10000000;
         assignin('base', 'blocksToStop', blocksToStop);
         errorsToStop = 100;
         assignin('base', 'errorsToStop', errorsToStop);
@@ -52,7 +57,7 @@ for i = 1:3
 end
 
 datei = fopen(uiputfile({'*.csv', 'Comma-separated Values'}), 'w');
-separator = ';';
+separator = ',';
 decimal = '.';
 TableData = evalin('base', 'TableData');
 for z=1:size(TableData, 1)

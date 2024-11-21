@@ -1,7 +1,7 @@
 *.pdf
 *.ppt*
-*.doc
-*.docx
+*.xl*
+*.doc*
 *.png
 *.odt*
 *.ods*
@@ -17,6 +17,8 @@
 *.out
 *.djvu
 *.mp*
+*.exe
+*.ova
 
 urpo
 arch
@@ -27,3 +29,9 @@ statmod
 subd
 tafy
 tpr
+
+oms
+pak
+trkpo
+graph
+
