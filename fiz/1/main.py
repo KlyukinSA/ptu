@@ -9,12 +9,12 @@ import matplotlib.pyplot as plt
 #  * f - правая часть (столбец)                  (нумеруется: [0;n-1])
 #  * x - решение, массив x будет содержать ответ (нумеруется: [0;n-1])
 def TDMA(a, b, c, f):
-    a, b, c, f = tuple(map(lambda k_list: list(map(float, k_list)), (a, b, c, f)))
+    a, b, c, f = tuple(map(lambda k_list: k_list.astype('float64'), (a, b, c, f)))
 
     alpha = [-b[0] / c[0]]
     beta = [f[0] / c[0]]
     n = len(f)
-    x = np.array([0] * n, dtype='float32')
+    x = np.array([0] * n, dtype='float64')
 
     for i in range(1, n):
         alpha.append(-b[i]/(a[i]*alpha[i-1] + c[i]))
@@ -98,8 +98,8 @@ for N in Ns:
             + h_2(i) * r_1(i) * q_1(i)
         b[i] = 0
         g[i] = h_2(i) * r_1(i) * f_1(i) + r_1(i) * v2
-        x = TDMA(a, b, c, g)
-        r = x - np.array(u, dtype='float32')
+        v = TDMA(a, b, c, g)
+        r = v.astype('float32') - np.array(u, dtype='float32')
         val = abs(max(r.min(), r.max(), key=abs))
         vals.append(val)
 
