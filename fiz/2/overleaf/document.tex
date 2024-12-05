@@ -1,0 +1,55 @@
+\documentclass[a4paper,12pt]{article}
+
+\input{preamble.tex}
+
+\begin{document}
+	\include{titlepage.tex}
+	\newpage
+	\tableofcontents
+	\newpage
+
+	\section{Вступление}
+	\subsection{Постановка задачи}
+
+	Вариант C3. Используя интегро-интерполяционный метод (метод баланса), разработать программу для моделирования нестационарного распределения температуры в цилиндре, описываемого математической моделью вида:
+ 
+	\begin{align*}
+		&\frac{\partial u}{\partial t} = \frac{1}{r} \frac{\partial}{\partial r}
+		\left ( rk(r, t)\frac{\partial u}{\partial r} \right ) - q(r, t)u + f(r,t),
+		\ r \in \left[ 0, R\right],\ t \in [0, T],
+		\\
+		&0 < c_1 \leq k(r, t) \leq c_2,\ 0 \leq q(r, t)
+	\end{align*}
+
+	Начальное условие:
+	\[
+		\left. u \right\vert_{t=0} = \varphi(r)
+	\]
+
+	Граничные условия: 
+ 
+    \centerline{\(\left. u\right\vert_{r = 0}\) - ограничено}
+    \[-k \left. \frac{\partial u}{\partial r}\right\vert_{r = R} = \chi\left.u\right\vert_{r = R} - \nu, \chi > 0\]
+    
+	\subsection{Используемое ПО}
+
+	\begin{enumerate}
+    \item Python 3.10.12
+    \item numpy 1.26.2
+    \end{enumerate}
+	\newpage
+
+	\section{Основная часть}
+	\input{tex/balance.tex}
+	\input{tex/euler.tex}
+	\input{tex/testing.tex}
+	\newpage
+
+	\section{Заключение}
+	\subsection{Вывод}
+	Задание выполнено полностью. Были написаны: вычисление коэффициентов разностной схемы, явный и неявный метод Эйлера.
+	Оба метода были протестированы. Были выявлены особенности выбора метода и параметров дискретизации.
+	\newpage
+	\subsection{Код}
+	\inputminted{python}{main.py}
+\end{document}

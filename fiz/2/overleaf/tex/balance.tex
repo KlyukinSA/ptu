@@ -1,0 +1,208 @@
+\subsection{Разностная схема}
+Введем основную сетку, где N - число разбиений.
+\[ 
+  r_0 < r_1 < \dots < r_N,\ r_i \in [0, R],\ r_0 = 0,\ r_N = R
+\]
+\[
+  h_i =r_i - r_{i-1},\ i=1,2, \dots, N
+\]
+\[
+  r_{r-0.5} = \frac{r_i - r_{i-1}}{2},\ i=1,2, \dots, N
+\]
+Введем дополнительную сетку:
+\[
+  \hbar_i = \begin{cases}
+    \frac{h_i + 1}{2},\ i = 0 \\ \\
+    \frac{h_i + h_{i+1}}{2},\ i = 1, 2, \dots, N-1 \\ \\
+    \frac{h_i}{2},\ i = N
+  \end{cases}
+\]
+Напишем наше уравнение:
+\begin{align*}
+  \frac{\partial u}{\partial t} = \frac{1}{r} \frac{\partial}{\partial r}
+  \left ( rk(r, t)\frac{\partial u}{\partial r} \right ) - q(r, t)u + f(r,t)
+\end{align*}
+
+\begin{align*}
+  r \cdot \frac{\partial u}{\partial t} = \frac{\partial}{\partial r}
+  \left ( rk\frac{\partial u}{\partial r} \right ) - r \cdot qu + r \cdot f
+\end{align*}
+
+Проинтегрируем наше уравнение:
+\[
+  \int\limits^{r_i+\frac{1}{2}}_{r_i-\frac{1}{2}} r \frac{\partial u}{\partial t} dr =
+  \int\limits^{r_i+\frac{1}{2}}_{r_i-\frac{1}{2}} \frac{\partial}{\partial r} \left ( rk\frac{\partial u}{\partial r} \right ) dr
+  - \int\limits^{r_i+\frac{1}{2}}_{r_i-\frac{1}{2}} rqu dr + \int\limits^{r_i+\frac{1}{2}}_{r_i-\frac{1}{2}} rf dr
+\]
+
+Используем формулу похожую на формулу средних прямоугольников:
+\[
+  \int\limits^{r_i+\frac{1}{2}}_{r_i-\frac{1}{2}} \varphi(x)dx \approx \hbar_i \varphi_i
+\]
+\[
+  \hbar_i r_i \frac{d v_i}{dt} = \left . rk \frac{\partial u}{\partial r} \right \vert_{r=r_{i+\frac{1}{2}}}
+  - \left . rk \frac{\partial u}{\partial r} \right \vert_{r=r_{i-\frac{1}{2}}} -\hbar_i r_i q_i v_i + \hbar_i r_i f_i
+\]
+
+Используем формулы численного дифференцирования:
+\begin{align*}
+  &\left . rk \frac{\partial u}{\partial r} \right \vert_{r=r_{i+\frac{1}{2}}} = r_{i + \frac{1}{2}} k_{i + \frac{1}{2}} \frac{v_{i+1}-v_i}{h_{i + 1}} \\
+  &\left . rk \frac{\partial u}{\partial r} \right \vert_{r=r_{i-\frac{1}{2}}} = r_{i - \frac{1}{2}} k_{i - \frac{1}{2}} \frac{v_{i}-v_{i-1}}{h_{i}}
+\end{align*}
+
+Тем самым мы получили нашу разностную схему внутри промежутка:
+\[
+  \hbar_i r_i \frac{d v_i}{dt} = r_{i + \frac{1}{2}} k_{i + \frac{1}{2}} \frac{v_{i+1}-v_i}{h_{i + 1}} 
+  - r_{i - \frac{1}{2}} k_{i - \frac{1}{2}} \frac{v_{i}-v_{i-1}}{h_{i}} -\hbar_i r_i q_i v_i + \hbar_i r_i f_i,\ i = 1, 2, \dots, N-1
+\]
+\[
+  \frac{d v_i}{dt} = \frac{r_{i + \frac{1}{2}} k_{i + \frac{1}{2}}}{\hbar_i r_i h_{i + 1}} (v_{i+1}-v_i)
+  - \frac{r_{i - \frac{1}{2}} k_{i - \frac{1}{2}}}{\hbar_i r_i h_{i}} (v_{i}-v_{i-1}) - q_i v_i + f_i,\ i = 1, 2, \dots, N-1
+\]
+
+Проведем аппроксимацию граничного условия слева:
+\[
+  \int\limits^{r_i+\frac{1}{2}}_{r_i} r \frac{\partial u}{\partial t} dr =
+  \int\limits^{r_i+\frac{1}{2}}_{r_i} \frac{\partial}{\partial r} \left ( rk\frac{\partial u}{\partial r} \right ) dr
+  - \int\limits^{r_i+\frac{1}{2}}_{r_i} rqu dr + \int\limits^{r_i+\frac{1}{2}}_{r_i} rf dr,\ i = 0
+\]
+
+Граничное условие
+
+\centerline{\(\left. u\right\vert_{r = 0}\) - ограничено}
+\medskip
+
+Используем хитрую формулу для условия ограниченности:
+\[
+  \int\limits^{r_i+\frac{1}{2}}_{r_i} x \varphi(x)dx \approx \hbar_i \varphi_i \frac{r_{i+\frac{1}{2}}}{2}
+\]
+
+Получаем:
+\[\hbar_i \frac{d v_i}{dt} \frac{r_{i+\frac{1}{2}}}{2} = r_{i + \frac{1}{2}} k_{i + \frac{1}{2}} \frac{v_{i+1}-v_i}{h_{i + 1}} - 0 - \hbar_i q_i v_i \frac{r_{i+\frac{1}{2}}}{2} + \hbar_i f_i \frac{r_{i+\frac{1}{2}}}{2},\ i = 0\]
+\[\hbar_i \frac{d v_i}{dt} = 2 k_{i + \frac{1}{2}} \frac{v_{i+1}-v_i}{h_{i + 1}} - \hbar_i q_i v_i + \hbar_i f_i,\ i = 0\]
+
+Проведем аппроксимацию граничного условия справа:
+\[
+  \int\limits^{r_i}_{r_i-\frac{1}{2}} r \frac{\partial u}{\partial t} dr =
+  \int\limits^{r_i}_{r_i-\frac{1}{2}} \frac{\partial}{\partial r} \left ( rk\frac{\partial u}{\partial r} \right ) dr
+  - \int\limits^{r_i}_{r_i-\frac{1}{2}} rqu dr + \int\limits^{r_i}_{r_i-\frac{1}{2}} rf dr,\ i = N
+\]
+\[
+  \hbar_i r_i \frac{d v_i}{dt} = \left . rk \frac{\partial u}{\partial r} \right \vert_{r=r_i}
+  - \left . rk \frac{\partial u}{\partial r} \right \vert_{r=r_{i-\frac{1}{2}}} -\hbar_i r_i q_i v_i + \hbar_i r_i f_i,\ i = N
+\]
+
+Граничное условие:
+\[
+  -k \left. \frac{\partial u}{\partial r}\right\vert_{r = R} = \chi\left.u\right\vert_{r = R} -\nu
+\]
+
+Получаем:
+\[
+  \hbar_i r_i \frac{d v_i}{dt} = -r_{i } (\chi v_i - \nu)
+  - r_{i - \frac{1}{2}} k_{i - \frac{1}{2}} \frac{v_{i}-v_{i-1}}{h_{i}} -\hbar_i r_i q_i v_i + \hbar_i r_i f_i,\ i = N
+\]
+\[
+  \frac{d v_i}{dt} = \frac{-(\chi v_i - \nu)}{\hbar_i}
+  - \frac{r_{i - \frac{1}{2}} k_{i - \frac{1}{2}}}{\hbar_i r_i h_{i}} (v_{i}-v_{i-1}) - q_i v_i + f_i,\ i = N
+\]
+
+Введем обозначения:
+\[
+  B_1 =\frac{r_{i + \frac{1}{2}} k_{i + \frac{1}{2}}}{\hbar_i r_i h_{i + 1}} 
+  \quad B_2 = \frac{r_{i - \frac{1}{2}} k_{i - \frac{1}{2}}}{\hbar_i r_i h_{i}} \quad C_1 = 2 B_1 \frac{r_i}{r_{i+\frac{1}{2}}}
+\]
+
+Запишем полученные уравнения:
+\[
+  \begin{cases}
+    \frac{d v_i}{dt} = C_1 (v_{i+1}-v_i) - q_i v_i + f_i,\ i = 0 \\
+
+    \frac{d v_i}{dt} = B_1 (v_{i+1}-v_i) - B_2 (v_{i}-v_{i-1}) - q_i v_i + f_i,\ i = 1, 2, \dots, N-1 \\
+
+    \frac{d v_i}{dt} = \frac{\nu - \chi v_i}{\hbar_i} - B_2 (v_{i}-v_{i-1}) - q_i v_i + f_i,\ i = N
+  \end{cases}
+\]
+
+Сгруппируем значения:
+\[
+  \begin{cases}
+    \frac{d v_i}{dt} = C_1 v_{i+1} - (C_1 + q_i) v_i + f_i,\ i=0 \\
+    \frac{d v_i}{dt} = B_1 v_{i+1} - (B_1 + B_2 + q_i) v_i + B_2 v_{i - 1} + f_i,\ i = 1, 2,\dots, N-1\\
+    \frac{d v_i}{dt} = -(B_2 + q_i + \frac{\chi}{\hbar_i})v_i + B_2 v_{i - 1} + \frac{\nu}{\hbar_i} + f_i,\ i = N
+  \end{cases}
+\]
+
+Мы получили систему:
+\begin{align*}
+  \begin{pmatrix}
+    \frac{d v_0}{dt} \\
+    \frac{d v_1}{dt} \\
+    \vdots \\
+    \vdots \\
+    \vdots \\
+    \frac{d v_{n-1}}{dt} \\
+    \frac{d v_{n}}{dt} 
+  \end{pmatrix} 
+  =
+  \begin{pmatrix}
+    c_0 & b_0 & &  &  &  & 0 \\
+    a_1 & c_1 & b_1 &  & & & \\
+     &   \ddots & \ddots & \ddots & & & \\
+     & &  \ddots & \ddots & \ddots & &  \\
+     & & & \ddots & \ddots & \ddots &  \\
+     &  &  & & a_{n-1} & c_{n-1} & b_{n-1} \\
+     0 & & & &  &a_n & c_n
+  \end{pmatrix}
+  \begin{pmatrix}
+    v_0 \\
+    v_1 \\
+    \vdots \\
+    \vdots \\
+    \vdots \\
+    v_{n-1} \\
+    v_n
+  \end{pmatrix} +
+  \begin{pmatrix}
+    g_0 \\
+    g_1 \\
+    \vdots \\
+    \vdots \\
+    \vdots \\
+    g_{n-1} \\
+    g_n
+  \end{pmatrix}
+\end{align*}
+
+где:
+
+\begin{align*}
+  & & &c_0=-(C_1 + q_0) & &b_0=C_1 & &g_0= f_0 \\
+  &a_i=B_2 & &c_i=-(B_1 + B_2 + q_i) & &b_i=B_1 & &g_i=f_i \\
+  &a_N=B_2 & &c_N=-(B_2 + q_N + \frac{\chi}{\hbar_N}) & & & &g_N= \frac{\nu}{\hbar_N} + f_N
+\end{align*}
+
+\subsection{Решение системы ОДУ}
+
+Система имеет вид:
+\[
+  \frac{d v}{dt} = Av + g
+\]
+
+Введем дискретизацию по времени и проинтегрируем на одном из промежутков:
+\[
+  \int\limits_{t_{n}}^{t_n+1} \frac{d v_i}{dt} \,dt = \int\limits_{t_{n}}^{t_n+1} (A(t)v(t) + g(t)) dt
+\]
+\[
+  v(t_{n+1}) - v(t_n) = \int\limits_{t_{n}}^{t_n+1} (A(t)v(t) + g(t)) dt
+\]
+
+Добавим к полученному уравнению начальное условие и тем самым получаем систему:
+\[
+  \begin{cases}
+    v(t_{n+1}) = v(t_n) + \int\limits_{t_{n}}^{t_n+1} (A(t)v(t) + g(t)) dt \\
+    v(t_0) = \varphi(r)
+  \end{cases}
+\]
+
+Решение задачи сводится к поиску значения интеграла.

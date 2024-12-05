@@ -1,7 +1,6 @@
 import numpy as np
 import sys
-import warnings
-warnings.filterwarnings("error")
+import matplotlib.pyplot as plt
 
 
 def TDMA(a, b, c, f):
@@ -22,18 +21,22 @@ def tridiag(a, b, c, k1=-1, k2=0, k3=1):
 
 
 test_index = int(sys.argv[1])
-method = 'implicit'
+method = sys.argv[2]
 fmt = "%0.2E"
 
 bl = 0
 br = 1
-# Ns = [4, 8]#, 16, 32]#, 64, 128, 256, 512, 1024, 2048, 4096, 8192]#, 16000, 32000]
-Ns = [16]
+Ns = [pow(2, 3 + i) for i in range(int(sys.argv[3]))]
+# Ns = [4,8,16,32]
 
-T = 0.11
-Hs = [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6]
+T = 1
+Hs = [pow(10, -1 - i) for i in range(int(sys.argv[3]))]
+# Hs = [1e-2, 1e-6]
 
+print(Ns, Hs)
+maxmaxes = []
 for N in Ns:
+    maxmaxes.append([])
     wN = N + 1
     h = (br - bl) / N
     def r_1(i):
@@ -52,7 +55,11 @@ for N in Ns:
             v0 = np.array([np.float32(phi(r_1(i))) for i in range(wN)], dtype='float32')
             v = v0.copy()
             maxes = []
+            # T = H * 100
             for t in np.arange(0, T, H):
+                if method == 'imp':
+                    t = t + H
+                
                 def k_2(i):
                     return np.float32(k(r_2(i), t))
                 def q_1(i):
@@ -93,8 +100,9 @@ for N in Ns:
                 b[i] = 0
                 g[i] = nu_1 / h_2(i) + f_1(i)
 
-                if method == 'explicit':
+                if method == 'exp':
                     A = tridiag(a[1:], c, b[:-1])
+                    # norms.append(np.linalg.norm(A))
                     try:
                         integrand = A @ v + g
                     except RuntimeWarning:
@@ -110,16 +118,16 @@ for N in Ns:
                 d = v.astype('float32') - np.array([u_1(i) for i in range(wN)], dtype='float32')
                 val = abs(max(d.min(), d.max(), key=abs))
                 maxes.append(val)
-                # print(t, v)
-            print(fmt % H, fmt % max(maxes))
+            # plt.plot(np.arange(0, T, H), norms)
+            # plt.show()
+            maxmaxes[-1].append(max(maxes))
   
     def phi(r):
         return u(r, 0)
-    
-    def chi(t):
-        return 2*t+1
 
-    if False:
+    if test_index == 4:
+        def chi(t):
+            return 1
         def k(r, t):
             return 3*r+2
         def q(r, t):
@@ -131,7 +139,11 @@ for N in Ns:
         def nu(t):
             return chi(t)
         tones()
-    if test_index == 0: # exp 1.00E-04 1.18E-04 imp 1.00E-04 1.00E-04
+    
+    def chi(t):
+        return 2*t+1
+    
+    if test_index == 0:
         def k(r, t):
             return 3*r+2
         def q(r, t):
@@ -160,11 +172,11 @@ for N in Ns:
 
     if test_index == 2:
         def u(r, t):
-            return 4 + np.exp(-t**2)
+            return 4 + np.exp(-10*t**2)
         def f(r, t):
-            return (-4*t + (4*np.exp(t**2) + 1)*(np.sin(r) + 4))*np.exp(-t**2)/2
+            return (-40*t + (4*np.exp(10*t**2) + 1)*(np.sin(r) + 4))*np.exp(-10*t**2)/2
         def nu(t):
-            return (2*t + 1)*(4*np.exp(t**2) + 1)*np.exp(-t**2)
+            return (2*t + 1)*(4*np.exp(10*t**2) + 1)*np.exp(-10*t**2)
         tones()
 
     if test_index == 3:
@@ -175,3 +187,18 @@ for N in Ns:
         def nu(t):
             return br*(np.cos(br) + 6) + (br**2 + t**2)*(2*t + 1)
         tones()
+
+    if test_index == 5:
+        def k(r, t):
+            return r + t + 1
+        def q(r, t):
+            return r**(0.5) * np.sin(t)
+        def u(r, t):
+            return r**2*np.exp(-t)
+        def f(r, t):
+            return (-r**2 - 6*r + r**2.5*np.sin(t) - 4*t - 4)*np.exp(-t)
+        def nu(t):
+            return br*(2*br*t + 3*br + 2*t + 2)*np.exp(-t)
+        tones()
+
+print(maxmaxes)
