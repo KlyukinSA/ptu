@@ -1,0 +1,43 @@
+\section{Невязка разностной схемы}
+
+\subsection{Невязка во внутренних точках}
+
+Будем искать невязку в следующем виде:
+\[
+  \tilde{\xi}_{i, j} = \frac{\xi_{i, j}}{h_r h_z}
+\]
+
+\begin{align*}
+  &\tilde{\xi}_{i, j} = 
+  h^2_r\left[ \frac{1}{12} r k \frac{\partial^4 u}{\partial r^4} + \frac{1}{6}\frac{\partial r k}{\partial r}\frac{\partial^3 u}{\partial r^3}
+  + \frac{1}{8} \frac{\partial^2 r k}{\partial r^2}\frac{\partial^2 u}{\partial r^2}
+  + \frac{1}{24} \frac{\partial^3 r k}{\partial r^3}\frac{\partial u}{\partial r} \right]_{i,j} + \mathcal{O}(h_r^3) + \\
+  &+ h^2_z \left[
+    \frac{1}{12} r \frac{\partial^4 u}{\partial z^4}
+     \right]_{i, j} + \mathcal{O}(h_z^3)
+\end{align*}
+Порядок аппроксимации $p_r = 2 - 0 = 2 $, $ p_z = 2 - 0 = 2 $.
+
+\subsection{Невязка на левой границе}
+
+Будем искать невязку в следующем виде:
+\[ \Tilde{\xi}_{0, j} = \frac{\xi_{0, j}}{h_z} \]
+Получаем:
+\begin{align*}
+  &\Tilde{\xi}_{i, j} = 
+  h^2_r \left[
+  \frac{1}{6} rk \frac{\partial^3 u}{ \partial r^3} +
+  \frac{1}{4} \frac{\partial rk}{ \partial r} \frac{\partial^2 u}{ \partial r^2} +
+  \frac{1}{8} \frac{\partial^2 rk}{ \partial r^2} \frac{\partial u}{ \partial r}
+  \right]_{i ,j} + \mathcal{O}(h^3_r) + \\
+ & + h_r\left[ r h^2_z\left( 
+  \frac{1}{24} \frac{\partial^4 u}{ \partial z^4}
+  \right)_{i, j}
+  + \mathcal{O}(h^3_z) \right]
+\end{align*}
+
+Порядок аппроксимации $ p_r = 2 - 0 = 2, p_z = 2 - 0 = 2 $.
+
+По определению невязки на остальных границах она равна нулю.
+
+Можно сделать вывод, что разностная схема в целом имеет второй порядок аппроксимации.

@@ -1,0 +1,206 @@
+\section{Разностная схема}
+Введем основную сетку:
+\begin{align*}
+  &N_r - \text{число разбиений на } [R_0, R_1] & &N_z - \text{число разбиений на } [0, L] \\
+  &r_0 < r_1 < \cdots < r_N & &z_0 < z_1 < \cdots < z_N \\
+  &r_0 = R_0,\quad r_N = R_1 & &z_0 = 0,\quad z_N = L \\
+  &h_r = \frac{R_1 - R_0}{N_r} & &h_z = \frac{L - 0}{N_z}
+\end{align*}
+
+Введем дополнительную сетку:
+\begin{align*}
+  &r_{i-\frac{1}{2}} = \frac{r_i + r_{i - 1}}{2}\quad i=1,\cdots, N_r & &z_{j-\frac{1}{2}} = \frac{z_j + z_{j - 1}}{2}\quad j=1,\cdots, N_z \\
+  & \hbar_i = \begin{cases}
+    \frac{h_r}{2},\ i = 0 \\ \\
+    h_r,\ i = 1, 2, \dots, N_r-1 \\ \\
+    \frac{h_r}{2},\ i = N_r
+  \end{cases} &
+  & \hbar_j = \begin{cases}
+    \frac{h_z}{2},\ j = 0 \\ \\
+    h_z,\ j = 1, 2, \dots, N_z-1 \\ \\
+    \frac{h_z}{2},\ j = N_z
+  \end{cases}
+\end{align*}
+
+Преобразуем наше начальное уравнение домножив на r
+
+\[
+  - \left [ \pdv{}{r} \left ( r k(r) \pdv{u}{r} \right ) 
+  + \pdv[2]{ru}{z} \right ] = rf(r, z)
+\]
+
+\subsection{Внутренние точки}
+% Проинтегрируем уравнение (\hyperref[eq1]{1}) в области
+$ [r_{i -\frac{1}{2}}, r_{i +\frac{1}{2}}] \times  [z_{j -\frac{1}{2}}, z_{j +\frac{1}{2}}] $
+для $ i = 1, 2, \dots, N_r - 1 $ и $ j = 1, 2, \dots, N_z - 1$.
+
+\[
+  - \mLim{+\frac{1}{2}}{-\frac{1}{2}}{+\frac{1}{2}}{-\frac{1}{2}} \left [ \pdv{}{r} \left ( r k(r) \pdv{u}{r} \right ) 
+  + \pdv[2]{ru}{z} \right ] dr dz = \mLim{+\frac{1}{2}}{-\frac{1}{2}}{+\frac{1}{2}}{-\frac{1}{2}} rf(r, z) dr dz
+\]
+
+Получим:
+
+\begin{align*}
+  &- \left [
+   \mLimZ{z}{+\frac{1}{2}}{-\frac{1}{2}}{j}  \left . r k(r) \pdv{u}{r} \right \vert_{r = r_{i + \frac{1}{2}}} dz
+  - \mLimZ{z}{+\frac{1}{2}}{-\frac{1}{2}}{j} \left . r k(r) \pdv{u}{r} \right \vert_{r = r_{i - \frac{1}{2}}} dz
+  \right . \\
+  &\left . + \mLimS{r}{+\frac{1}{2}}{-\frac{1}{2}} \left . r \pdv{u}{z} \right \vert_{z = z_{j + \frac{1}{2}}} dr
+  - \mLimS{r}{+\frac{1}{2}}{-\frac{1}{2}} \left . r \pdv{u}{z} \right \vert_{z = z_{j - \frac{1}{2}}} dr
+  \right ] = \mLim{+\frac{1}{2}}{-\frac{1}{2}}{+\frac{1}{2}}{-\frac{1}{2}} rf(r, z) dr dz
+\end{align*}
+
+Воспользуемся формулами численного дифференцирования:
+\[
+  \left . k(r) \pdv{u}{r} \right \vert_{r = r_{i - \frac{1}{2}}}
+  \approx k(r_{i - \frac{1}{2}}) \frac{v_{i, j} - v_{i - 1, j}}{h_r}
+\]
+
+\[
+  \left . \pdv{u}{r} \right \vert_{z = z_{j - \frac{1}{2}}}
+  \approx \frac{v_{i, j} - v_{i, j - 1}}{h_z}
+\]
+
+Также воспользуемся формулой средних прямоугольников:
+\[
+  \mLimS{r}{+\frac{1}{2}}{-\frac{1}{2}} r \varphi(r, z) dr
+  = \hbar_i r_i \varphi_i
+\]
+\[
+  \mLim{+\frac{1}{2}}{-\frac{1}{2}}{+\frac{1}{2}}{-\frac{1}{2}} r \varphi(r, z) drdz
+  = \hbar_i\hbar_j r_i \varphi_{i, j}
+\]
+
+В итоге получим уравнение разностной схемы:
+\begin{align*}
+  &- \left [ 
+  \hbar_j r_{i+\frac{1}{2}} k(r_{i+\frac{1}{2}}) \frac{v_{i+1, j} - v_{i, j}}{h_{r}}
+  - \hbar_j r_{i-\frac{1}{2}} k(r_{i-\frac{1}{2}}) \frac{v_{i, j} - v_{i - 1, j}}{h_{r}}
+  \right . \\
+  &\left .
+  + \hbar_i r_{i} \frac{v_{i, j + 1} - v_{i, j}}{h_{z}}
+  - \hbar_i r_{i} \frac{v_{i, j} - v_{i, j - 1}}{h_z}
+  \right ]  = \hbar_i \hbar_j r_i f_{i, j}
+\end{align*}
+
+Так как выбранная основная сетка является равномерной, то $ \hbar_i = h_r $ и $ \hbar_j = h_z$
+, для $ i = 1, 2, \dots, N_r - 1 $ и $ j = 1, 2, \dots, N_z - 1$.
+
+\begin{align*}
+  &- \left [ 
+  h_z r_{i+\frac{1}{2}} k(r_{i+\frac{1}{2}}) \frac{v_{i+1, j} - v_{i, j}}{h_{r}}
+  - h_z r_{i-\frac{1}{2}} k(r_{i-\frac{1}{2}}) \frac{v_{i, j} - v_{i - 1, j}}{h_{r}}
+  \right . \\
+  &\left .
+  + h_r r_{i} \frac{v_{i, j + 1} - v_{i, j}}{h_{z}}
+  - h_r r_{i} \frac{v_{i, j} - v_{i, j - 1}}{h_z}
+  \right ]  = h_r h_z r_i f_{i, j}
+\end{align*}
+
+Умножим на $\frac{h_z}{h_r r_i}$, чтобы получилась подходящая для применяемого метода решения СЛАУ форма.
+\begin{align*}
+  - \left [ 
+  h_z^2 \frac{r_{i+\frac{1}{2}}}{r_i} k(r_{i+\frac{1}{2}}) \frac{v_{i+1, j} - v_{i, j}}{h_{r}^2}
+  - h_z^2 \frac{r_{i-\frac{1}{2}}}{r_i} k(r_{i-\frac{1}{2}}) \frac{v_{i, j} - v_{i - 1, j}}{h_{r}^2}
+  + v_{i, j + 1} - 2 v_{i, j} + v_{i, j - 1}
+  \right ]  = h_z^2 f_{i, j}
+\end{align*}
+
+\subsection{На левой границе}
+
+$ [r_{i}, r_{i +\frac{1}{2}}] \times  [z_{j -\frac{1}{2}}, z_{j +\frac{1}{2}}] $
+для $ i = 0 $ и $ j = 1, 2, \dots, N_z - 1$.
+
+Получаем:
+\begin{align*}
+  &- \left [
+   \mLimZ{z}{+\frac{1}{2}}{-\frac{1}{2}}{j}  \left . r k(r) \pdv{u}{r} \right \vert_{r = r_{i + \frac{1}{2}}} dz
+  - \mLimZ{z}{+\frac{1}{2}}{-\frac{1}{2}}{j} \left . r k(r) \pdv{u}{r} \right \vert_{r = r_{i}} dz
+  \right . \\
+  &\left . + \mLimS{r}{+\frac{1}{2}}{} \left . r\pdv{u}{z} \right \vert_{z = z_{j + \frac{1}{2}}} dr
+  - \mLimS{r}{+\frac{1}{2}}{} \left . r\pdv{u}{z} \right \vert_{z = z_{j - \frac{1}{2}}} dr
+  \right ] = \mLim{+\frac{1}{2}}{}{+\frac{1}{2}}{-\frac{1}{2}} rf(r, z) dr dz
+\end{align*}
+
+Имеем граничное условие:
+\[ \left . k(r) \pdv{u}{r} \right \vert_{r=R_0} = \chi_1 \left . u \right \vert_{r=R_0} - \varphi_1(z) \]
+
+Получаем уравнение разностной схемы:
+
+\begin{align*}
+  &- \left [ 
+  h_z r_{i+\frac{1}{2}} k(r_{i+\frac{1}{2}}) \frac{v_{i+1, j} - v_{i, j}}{h_{r}}
+  - h_z r_{i} (\chi_1(z_j) v_{i, j} - \varphi_1(z_j))
+  \right . \\
+  &\left .
+  + \frac{h_r}{2} r_{i} \frac{v_{i, j + 1} - v_{i, j}}{h_{z}}
+  - \frac{h_r}{2} r_{i} \frac{v_{i, j} - v_{i, j - 1}}{h_z}
+  \right ]  = \frac{h_r}{2} h_z r_i f_{i, j}
+\end{align*}
+
+\begin{align*}
+  - \left [ 
+  2 h_z^2 \frac{r_{i+\frac{1}{2}}}{r_i} k(r_{i+\frac{1}{2}}) \frac{v_{i+1, j} - v_{i, j}}{h_{r}^2}
+  - 2 h_z^2 \frac{\chi_1(z_j) v_{i, j} - \varphi_1(z_j)}{h_r}
+  + v_{i, j + 1} - 2 v_{i, j} + v_{i, j - 1}
+  \right ]  = h_z^2 f_{i, j}
+\end{align*}
+
+\subsection{На правой границе}
+$ [r_{i -\frac{1}{2}}, r_{i}] \times  [z_{j -\frac{1}{2}}, z_{j +\frac{1}{2}}] $
+для $ i = N_r $ и $ j = 1, 2, \dots, N_z - 1$.
+
+Имеем граничное условие:
+\[ \left . u \right \vert_{r=R_1} = \varphi_2(z) \]
+
+Будем его сразу использовать:
+\[ v_{N_r,j} = \varphi_2(z_j) \]
+
+\subsection{На нижней границе}
+$ [r_{i  -\frac{1}{2}}, r_{i +\frac{1}{2}}] \times  [z_{j}, z_{j +\frac{1}{2}}] $
+для $ i = 1, 2, \dots, N_r - 1 $ и $ j = 0$.
+
+\[ \left . u \right \vert_{z=0} = \varphi_3(r) \]
+\[ v_{i,0} = \varphi_3(r_i) \]
+
+\subsection{На верхней границе}
+$ i = 1, 2, \dots, N_r - 1 $ и $ j = N_z $
+\[ \left . u \right \vert_{z=L} = \varphi_4(r) \]
+\[ v_{i,N_z} = \varphi_4(r_i) \]
+
+\subsection{Левый-нижний угол}
+
+$ [r_{i}, r_{i +\frac{1}{2}}] \times  [z_{j}, z_{j +\frac{1}{2}}] $
+для $ i = 0 $ и $ j = 0$.
+\[ v_{0,0} = \varphi_3(r_0) \]
+
+\subsection{Левый-верхний угол}
+
+$ i = 0 $ и $ j = N_z $
+
+\[ v_{0,N_z} = \varphi_4(r_0) \]
+
+\subsection{Правый-верхний угол}
+
+$ i = N_r $ и $ j = N_z $, возьмём известное граничное условие:
+
+\[ v_{N_r,N_z} = \varphi_4(r_{N_r}) \]
+
+\subsection{Правый-нижний угол}
+
+$ i = N_r $ и $ j = 0 $.
+
+\[ v_{N_r,0} = \varphi_2(z_0) \]
+
+\subsection{На нижней границе}
+$ [r_{i  -\frac{1}{2}}, r_{i +\frac{1}{2}}] \times  [z_{j}, z_{j +\frac{1}{2}}] $
+для $ i = 1, 2, \dots, N_r - 1 $ и $ j = 0$.
+
+\[ \left . u \right \vert_{z=0} = \varphi_3(r) \]
+\[ v_{i,0} = \varphi_3(r_i) \]
+
+\subsection{На верхней границе}
+$ i = 1, 2, \dots, N_r - 1 $ и $ j = N_z $
+\[ \left . u \right \vert_{z=L} = \varphi_4(r) \]
+\[ v_{i,N_z} = \varphi_4(r_i) \]
