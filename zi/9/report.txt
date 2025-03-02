@@ -1,0 +1,253 @@
+# 1.3. Задание 1. Установка необходимых компонент (Debian Linux)
+
+## 1. Выполните установку следующих пакетов
+
+root@deb10-1:~# apt install auditd apparmor-utils
+Чтение списков пакетов… Готово
+Построение дерева зависимостей… Готово
+Чтение информации о состоянии… Готово         
+Уже установлен пакет apparmor-utils самой новой версии (2.13.6-10).
+Уже установлен пакет auditd самой новой версии (1:3.0-2).
+Обновлено 0 пакетов, установлено 0 новых пакетов, для удаления отмечено 0 пакетов, и 238 пакетов не обновлено.
+
+## 2. Убедитесь, что служба аудита работает
+
+sysadmin@deb10-1:~$ systemctl status auditd
+● auditd.service - Security Auditing Service
+     Loaded: loaded (/lib/systemd/system/auditd.service; enabled; vendor preset: enabled)
+     Active: active (running) since Sun 2025-03-02 15:40:58 MSK; 5min ago
+       Docs: man:auditd(8)
+             https://github.com/linux-audit/audit-documentation
+    Process: 374 ExecStart=/sbin/auditd (code=exited, status=0/SUCCESS)
+    Process: 391 ExecStartPost=/sbin/augenrules --load (code=exited, status=0/SUCCESS)
+   Main PID: 386 (auditd)
+      Tasks: 2 (limit: 1117)
+     Memory: 3.0M
+        CPU: 38ms
+     CGroup: /system.slice/auditd.service
+             └─386 /sbin/auditd
+
+Warning: some journal files were not opened due to insufficient permissions.
+
+## 3. Убедитесь, что применяются политики мандатного доступа
+
+root@deb10-1:~# aa-status
+apparmor module is loaded.
+8 profiles are loaded.
+8 profiles are in enforce mode.
+   /usr/bin/man
+   /usr/lib/x86_64-linux-gnu/lightdm/lightdm-guest-session
+   /usr/lib/x86_64-linux-gnu/lightdm/lightdm-guest-session//chromium
+   lsb_release
+   man_filter
+   man_groff
+   nvidia_modprobe
+   nvidia_modprobe//kmod
+0 profiles are in complain mode.
+0 processes have profiles defined.
+0 processes are in enforce mode.
+0 processes are in complain mode.
+0 processes are unconfined but have a profile defined.
+
+# 1.4. Задание 2. Получение исходного кода, сборка, установка тестового приложения
+
+## 1. Скачайте исходный код используемого приложения
+
+## 2. Перейдите в каталог с файлами 6-ой лабораторной
+
+sysadmin@deb10-1:~/infsec/lab6$ ls
+macapp.c  macapp.service  Makefile
+
+## 3. Выполните сборку и установку приложения
+
+sysadmin@deb10-1:~/infsec/lab6$ make
+cc -o macapp macapp.c
+
+root@deb10-1:/home/sysadmin/infsec/lab6# make install
+install -m 755 macapp /usr/local/bin
+install -m 644 macapp.service /etc/systemd/system/
+systemctl daemon-reload
+
+# 1.5. Задание 3. Тестовый запуск приложения без действующих ограничений политики мандатного доступа.
+
+## 1. Убедитесь, что приложение присутствует по пути /usr/local/bin/macapp
+
+sysadmin@deb10-1:~/infsec/lab6$ ls /usr/local/bin/macapp
+/usr/local/bin/macapp
+
+## 2. Выполните его запуск. Приложение не должно выдавать никаких сообщений в процессе работы.
+
+sysadmin@deb10-1:~/infsec/lab6$ macapp
+fopen() failed for log: Permission denied
+bind() failed: Permission denied
+fopen() failed for keyfile: Permission denied
+fstat() failed for keyfile: Bad file descriptor
+read() failed for keyfile: Bad file descriptor
+fopen() failed for log: Permission denied
+bind() failed: Permission denied
+fopen() failed for keyfile: Permission denied
+fstat() failed for keyfile: Bad file descriptor
+read() failed for keyfile: Bad file descriptor
+^C
+
+root@deb10-1:/home/sysadmin/infsec/lab6# macapp
+^C
+
+## 3. Переключитесь на другой терминал и убедитесь, что приложение смогло создать свой файл журнала, открыть на прослушивание порт и скопировать во временный каталог закрытый ключ.
+
+sysadmin@deb10-1:~/infsec/lab6$ ls /var/log/macapp.log
+/var/log/macapp.log
+
+sysadmin@deb10-1:~/infsec/lab6$ ss -lnup | grep 777
+UNCONN 0      0            0.0.0.0:777        0.0.0.0:*
+
+sysadmin@deb10-1:~/infsec/lab6$ cat /tmp/ssh_key
+-----BEGIN OPENSSH PRIVATE KEY-----
+b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAA...
+
+## 4. Вернувшись в терминал с запущенным приложением завершите его работу
+
+## 5. Удалите создаваемые приложением файлы
+
+root@deb10-1:/home/sysadmin/infsec/lab6# rm -f /var/log/macapp.log
+root@deb10-1:/home/sysadmin/infsec/lab6# rm -f /tmp/ssh_key
+
+# 1.6. Задание 4. Создание минимальной политики Apparmor
+
+## 1. Создайте в /etc/apparmor.d файл политики с именем usr.local.bin.macapp
+
+## 2. Добавьте в него следующее содержание.
+
+#include <tunables/global>
+/usr/local/bin/macapp {
+    #include <abstractions/base>
+}
+
+root@deb10-1:/etc/apparmor.d# nano usr.local.bin.macapp
+
+## 3. Выполните применение (загрузку в ядро) указанной минимальной политики.
+
+root@deb10-1:/etc/apparmor.d# apparmor_parser -r usr.local.bin.macapp
+
+## 4. Убедитесь что политика действует в ограничивающем (enforce) режиме
+
+root@deb10-1:/etc/apparmor.d# aa-status
+apparmor module is loaded.
+9 profiles are loaded.
+9 profiles are in enforce mode.
+   /usr/bin/man
+   /usr/lib/x86_64-linux-gnu/lightdm/lightdm-guest-session
+   /usr/lib/x86_64-linux-gnu/lightdm/lightdm-guest-session//chromium
+   /usr/local/bin/macapp
+   lsb_release
+   man_filter
+   man_groff
+   nvidia_modprobe
+   nvidia_modprobe//kmod
+0 profiles are in complain mode.
+0 processes have profiles defined.
+0 processes are in enforce mode.
+0 processes are in complain mode.
+0 processes are unconfined but have a profile defined.
+
+# 1.7. Задание 5. Запуск приложения при действующих запретах политики мандатного доступа
+
+## 1. Выполните запуск приложения
+
+## 2. Убедитесь по выводу ошибок, что выполняемые приложением действия, реализуемые через механизм системных вызовов, приложению сделать не удается.
+
+root@deb10-1:/etc/apparmor.d# macapp
+fopen() failed for log: Permission denied
+bind() failed: Permission denied
+fopen() failed for keyfile: Permission denied
+fopen() failed for tempfile: Permission denied
+fstat() failed for keyfile: Bad file descriptor
+read() failed for keyfile: Bad file descriptor
+
+## 3. Перейдите на другой терминал. Посмотрите на сообщения системы аудита, связанные с механизмом мандатного доступа по журналу событий системы
+
+root@deb10-1:/etc/apparmor.d# journalctl -e | grep AVC
+мар 02 16:41:27 deb10-1 audit[1465]: AVC apparmor="STATUS" operation="profile_load" profile="unconfined" name="/usr/local/bin/macapp" pid=1465 comm="apparmor_parser"
+мар 02 16:42:37 deb10-1 audit[1471]: AVC apparmor="DENIED" operation="mknod" profile="/usr/local/bin/macapp" name="/var/log/macapp.log" pid=1471 comm="macapp" requested_mask="c" denied_mask="c" fsuid=0 ouid=0
+мар 02 16:42:37 deb10-1 audit[1471]: AVC apparmor="DENIED" operation="capable" profile="/usr/local/bin/macapp" pid=1471 comm="macapp" capability=10  capname="net_bind_service"
+мар 02 16:42:37 deb10-1 audit[1471]: AVC apparmor="DENIED" operation="open" profile="/usr/local/bin/macapp" name="/etc/ssh/ssh_host_rsa_key" pid=1471 comm="macapp" requested_mask="r" denied_mask="r" fsuid=0 ouid=0
+мар 02 16:42:37 deb10-1 audit[1471]: AVC apparmor="DENIED" operation="mknod" profile="/usr/local/bin/macapp" name="/tmp/ssh_key" pid=1471 comm="macapp" requested_mask="c" denied_mask="c" fsuid=0 ouid=0
+мар 02 16:42:47 deb10-1 audit[1471]: AVC apparmor="DENIED" operation="mknod" profile="/usr/local/bin/macapp" name="/var/log/macapp.log" pid=1471 comm="macapp" requested_mask="c" denied_mask="c" fsuid=0 ouid=0
+мар 02 16:42:47 deb10-1 audit[1471]: AVC apparmor="DENIED" operation="open" profile="/usr/local/bin/macapp" name="/etc/ssh/ssh_host_rsa_key" pid=1471
+...
+
+## 4. Убедитесь, что приложение не смогло открыть порт на прослушивание, создать и открыть на запись файл журнала, а также скопировать ключ.
+
+root@deb10-1:/etc/apparmor.d# journalctl -e | grep AVC | grep bind
+мар 02 16:42:37 deb10-1 audit[1471]: AVC apparmor="DENIED" operation="capable" profile="/usr/local/bin/macapp" pid=1471 comm="macapp" capability=10  capname="net_bind_service"
+
+root@deb10-1:/etc/apparmor.d# journalctl -e | grep AVC | grep .log | head -n1
+мар 02 16:42:37 deb10-1 audit[1471]: AVC apparmor="DENIED" operation="mknod" profile="/usr/local/bin/macapp" name="/var/log/macapp.log" pid=1471 comm="macapp" requested_mask="c" denied_mask="c" fsuid=0 ouid=0
+
+root@deb10-1:/etc/apparmor.d# journalctl -e | grep AVC | grep tmp/ssh | head -n1
+мар 02 16:42:37 deb10-1 audit[1471]: AVC apparmor="DENIED" operation="mknod" profile="/usr/local/bin/macapp" name="/tmp/ssh_key" pid=1471 comm="macapp" requested_mask="c" denied_mask="c" fsuid=0 ouid=0
+
+# 1.8. Задание 6. Написание полностью разрешающий политики мандатного доступа
+
+## 1. Последовательно (по одному) добавляйте в применяемую для приложения политику мандатного доступа установки, разрешающие выполнение запрашиваемых им действий, а именно:
+
+capability net_bind_service,
+root@deb10-1:/etc/apparmor.d# apparmor_parser -r usr.local.bin.macapp
+root@deb10-1:/etc/apparmor.d# macapp 
+fopen() failed for log: Permission denied
+fopen() failed for keyfile: Permission denied
+fopen() failed for tempfile: Permission denied
+fstat() failed for keyfile: Bad file descriptor
+read() failed for keyfile: Bad file descriptor
+
+/var/log/macapp.log w,
+root@deb10-1:/etc/apparmor.d# apparmor_parser -r usr.local.bin.macapp
+root@deb10-1:/etc/apparmor.d# macapp 
+fopen() failed for keyfile: Permission denied
+fopen() failed for tempfile: Permission denied
+fstat() failed for keyfile: Bad file descriptor
+read() failed for keyfile: Bad file descriptor
+
+/etc/ssh/* r,
+root@deb10-1:/etc/apparmor.d# apparmor_parser -r usr.local.bin.macapp
+root@deb10-1:/etc/apparmor.d# macapp 
+fopen() failed for tempfile: Permission denied
+write() failed for tempfile: Bad file descriptor
+
+/tmp/* w,
+root@deb10-1:/etc/apparmor.d# apparmor_parser -r usr.local.bin.macapp
+root@deb10-1:/etc/apparmor.d# macapp 
+^C
+
+## 2. После добавления каждой из установок, выполняйте применение (загрузку в ядро) изменений политики.
+
+apparmor_parser -r usr.local.bin.macapp
+
+## 3. Запускайте приложение и наблюдая за ошибками, убедитесь, что добавлено разрешение действует.
+
+## 4. После добавления всех 4-ех разрешений приложение должно запускаться без сообщений об ошибках.
+
+# 1.9. Задание 7. Запрет доступа к SSH-ключу сервера
+
+## 1. Откройте политику мандатного доступа для приложения и удалите строку, разрешающую доступ к SSH-ключу.
+
+## 2. Выполняйте применение (загрузку в ядро) изменений политики.
+
+## 3. Запустите приложение и убедитесь, что оно может выполнять все предусмотренные им действия, кроме доступа к ключу.
+
+root@deb10-1:/etc/apparmor.d# apparmor_parser -r usr.local.bin.macapp
+root@deb10-1:/etc/apparmor.d# macapp 
+fopen() failed for keyfile: Permission denied
+fstat() failed for keyfile: Bad file descriptor
+read() failed for keyfile: Bad file descriptor
+
+# 1.10. Итоговое задание.
+
+## • Результатом выполнения данной лабораторной является следующая выбор-
+ка из файла журнала
+
+journalctl -e | grep AVC > /tmp/avc.log
+
+## • Файл avc.log находящийся в каталоге /tmp необходимо подгрузить на портал Moodle, как результат выполнения лабораторной работы. Условием успешности выполнения работы будет наличие в файле журнала аудита заблокированных по итогам выполнения Заданий 5 и 7 событий.
+
+

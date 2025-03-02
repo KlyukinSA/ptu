@@ -1,0 +1,8 @@
+#include <tunables/global>
+/usr/local/bin/macapp {
+	#include <abstractions/base>
+	capability net_bind_service,
+	/var/log/macapp.log w,
+	/etc/ssh/* r,
+	/tmp/* w,
+}
