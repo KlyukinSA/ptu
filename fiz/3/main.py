@@ -1,11 +1,9 @@
-from sympy import Symbol, simplify, latex, diff
+from sympy import Symbol, simplify, latex, diff, N, Float
 from sympy import log, sin
 from sys import argv
 import numpy as np
 
 
-def pp(v):
-    print(latex(v))
 def lmatrix(a):
     if len(a.shape) > 2:
         raise ValueError('matrix can at most display two dimensions')
@@ -14,54 +12,222 @@ def lmatrix(a):
     rv += ['  ' + ' & '.join(l.split()) + r'\\' for l in lines]
     rv +=  [r'\end{pmatrix}']
     return '\n'.join(rv).replace('0', ' ')
+def TDMA(a, b,  c, f):
+    alpha = [-b[0] / c[0]]
+    beta = [f[0] / c[0]]
+    n = len(f)
+    x = np.array([0] * n, dtype='float64')
+    for i in range(1, n):
+        alpha.append(-b[i]/(a[i]*alpha[i-1] + c[i]))
+        beta.append((f[i] - a[i]*beta[i-1])/(a[i]*alpha[i-1] + c[i]))
+    x[n-1] = beta[n - 1]
+    for i in range(n - 1, 0, -1):
+        x[i - 1] = alpha[i - 1]*x[i] + beta[i - 1]
+    return x
+def tridiag(a, b, c, k1=-1, k2=0, k3=1):
+    return np.diag(a, k1) + np.diag(b, k2) + np.diag(c, k3)
+def epsilon(v1, v2):
+    # return np.max(v1 - v2)
+    d = v1 - v2
+    return abs(max(d.min(), d.max(), key=abs))
+
+# solve linear system by odd-even elimination (complete reduction)
+# C - array of diagonals (b_m, c_m, d_m) for 1 block `C`
+def odd_even_elimination(C, F, n, V):
+    def main_diag(l, k):
+        # print(np.cos((2 * l - 1) * np.pi / 2**(k+1)))
+        return C[1] - 2 * np.cos((2 * l - 1) * np.pi / 2**(k+1))
+    def alpha(l, k):
+        return (-1)**(l + 1) * np.sin((2 * l - 1) * np.pi / 2**(k+1)) / 2**((k+1) - 1)
+    def accumulate(k, phi, psi, target):
+        for l in range(1, 2**(k-1) + 1):
+            C_m = tridiag(C[0][1:], main_diag(l, k-1), C[2][:-1])
+            # print(k, l, np.linalg.det(C_m), target)
+            if abs(np.linalg.det(C_m)) < 1e-2:
+                print('det=0', k, l, np.linalg.det(C_m), target)
+            target += TDMA(C[0], C[2], main_diag(l, k-1), psi + alpha(l, k-1) * phi)
+
+    N = F.shape[0] - 1
+    # print(N)
+    p = V
+    for j in range(1, N):
+        p[j] = F[j]
+    # print(p)
+    for k in range(1, n):
+        for j in range(2**k, N, 2**k):
+            phi = p[j - 2**(k - 1)] + p[j + 2**(k - 1)]
+            psi = np.zeros(phi.shape)
+            accumulate(k, phi, psi, p[j])
+            p[j] *= 0.5
+            # print(k, j, phi, psi, p[j])
+    V[0] = F[0]
+    V[N] = F[N]
+    # print(V)
+    # print([i for i in range(n, 0, -1)])
+    for k in range(n, 0, -1):
+        # print([i for i in range(2**(k-1), N - 2**(k-1) + 1, 2 * 2**(k-1))])
+        for j in range(2**(k-1), N, 2**k):
+            phi = V[j - 2**(k - 1)] + V[j + 2**(k - 1)]
+            psi = p[j].copy()
+            V[j] = 0
+            accumulate(k, phi, psi, V[j])
+            # print(k, j, phi, psi, V[j])
 
 
-test_name = argv[-1]
-if test_name == 'w':
-    one = Symbol('1')
+np.set_printoptions(linewidth=np.inf)
+latex_flag = len(argv) > 2 and argv[2] == 'latex'
+if argv[1] == 'w':
     r = Symbol('r')
     z = Symbol('z')
 
     chi = 2
+    R_0 = 1
+    R_1 = 3
+    L = 2
     test_cases = [
-        ( one, r + z**3 ),
-        ( r + 2 * z + 1, r + z**3 ),
-        ( (r + 2 * z + 1)**2, r + z**3 ),
-        ( sin(r * z) + 2, log(r) + z**(0.5) ),
+        ( Float(1), r + z**3 ),
+        ( r + 1, r + z**3 ),
+        ( (r + 1)**2, r + z**3 ),
+        ( sin(r) + 2, log(r) + z**(0.5) ),
     ]
     for test_num, test_case in enumerate(test_cases):
         k, u = test_case
         f = -( (1 / r) * diff(r * k * u.diff(r), r) + u.diff(z).diff(z))
-        # pp(simplify(f))
         phi = chi * u - k * u.diff(r)
-        pp(simplify(phi).subs(r, 'R0'))
-        print()
-elif test_name == 'eq':
-    n = 4
-    side = n**2
-    A = np.identity(side)
-    for k in range(1, n-1):
-        left=k * n
-        right=(k+1)*n-1
-        for i in range(left, right):
-            A[i, i] = 5
-            if i - 1 >= left:
-                A[i, i-1] = 2
-            if i + 1 < right:
-                A[i, i+1] = 2
-            if k > 0:
-                A[i, i-n] = -1
-            if k < n-1:
-                A[i, i+n] = -1
-    # print((A))
-    print(np.linalg.eig(A).eigenvalues)
+        if latex_flag:
+            print(str(test_num)+'&'+latex(k)+'&'+latex(u)+'&'+latex(simplify(f))+'&'+latex(simplify(phi).subs(r, 'R0'))+'\\\\')
+        def n_k(param_r):
+            return N(k.subs({r: param_r}))
+        def n_u(param_r, param_z):
+            return N(u.subs({r: param_r, z: param_z}))
+        def n_f(param_r, param_z):
+            return N(f.subs({r: param_r, z: param_z}))
+        def n_phi_1(param_z):
+            return N(phi.subs({r: R_0, z: param_z}))
+
+        for Nr, n in ((3, 2), ):
+            Nz = 2**n
+            h_r = (R_1 - R_0) / Nr
+            def r_1(i):
+                return (R_0 + h_r * i)
+            def r_2(i):
+                return (r_1(i) + h_r / 2)
+            h_z = L / Nz
+            def z_1(i):
+                return (h_z * i)
+            def z_2(i): #
+                return (z_1(i) + h_z / 2)
+            
+            C_diags = np.zeros((3, Nr+1))
+            for i in range(3):
+                for j in range(Nr+1):
+                    if i == 0:
+                        if j == 0:
+                            v = 0
+                        elif j == Nr:
+                            v = 0
+                        else:
+                            v = -((h_z**2)/(h_r**2)) * (r_2(j-1)/r_1(j)) * n_k(r_2(j-1))
+                    elif i == 1:
+                        if j == 0:
+                            v = 2 + 2 * ((h_z**2)/h_r) * (chi + (r_2(j)/(r_1(j)*h_r)) * n_k(r_2(j)))
+                        elif j == Nr:
+                            v = 1
+                        else:
+                            v = 2 + ((h_z**2)/(h_r**2)) * (r_2(j-1) * n_k(r_2(j-1)) + r_2(j) * n_k(r_2(j))) / r_1(j)
+                    else:
+                        if j == 0:
+                            v = -2 * ((h_z**2)/(h_r**2)) * (r_2(j)/r_1(j)) * n_k(r_2(j))
+                        elif j == Nr:
+                            v = 0
+                        else:
+                            v = -((h_z**2)/(h_r**2)) * (r_2(j)/r_1(j)) * n_k(r_2(j))
+                    # print(i, j, v)
+                    C_diags[i, j] = v
+            # C = tridiag(C_diags[0][1:], C_diags[1], C_diags[2][:-1])
+            # print('C=',C_diags)
+            x = np.zeros((Nz+1, Nr+1))
+            for i in range(Nz+1):
+                for j in range(Nr+1):
+                    x[i, j] = n_u(r_1(j), z_1(i))
+            # print('x=',x)
+            F = np.zeros(x.shape)
+            for i in range(Nz+1):
+                for j in range(Nr+1):
+                    if i == 0 or i == Nz or j == Nr:
+                        F[i, j] = x[i, j]
+                    elif j == 0:
+                        F[i, j] = h_z**2 * (n_f(r_1(j), z_1(i)) + 2 * (n_phi_1(z_1(i))/h_r))
+                    else:
+                        F[i, j] = h_z**2 * n_f(r_1(j), z_1(i))
+            j = Nr
+            odd_even_elimination_F_modification = np.zeros((Nz+1, ))
+            for i in range(1, Nz):
+                odd_even_elimination_F_modification[i] = F[i - 1, j] + F[i + 1, j]
+            for i in range(1, Nz):
+                F[i, j] -= odd_even_elimination_F_modification[i]
+            # print('F=',F)
+            V = np.zeros(F.shape)
+            odd_even_elimination(C_diags, F, n, V)
+            # print('V=',V)
+            print(epsilon(x, V) / np.max(x))
+            # print(x - V)
+elif argv[1] == 'eq':
+    Nr = 3
+    n = 2
+    Nz = 2**n
+    C_diags = np.zeros((3, Nr+1))
+    for i in range(3):
+        for j in range(Nr+1):
+            if i == 0:
+                if j == 0 or j == Nr:
+                    v = 0
+                else:
+                    v = 2
+            elif i == 1:
+                if j == Nr:
+                    v = 1
+                else:
+                    v = 5
+            else:
+                if j > Nr - 2:
+                    v = 0
+                else:
+                    v = 2
+            C_diags[i, j] = v
+    # print(C_diags)
+    C = tridiag(C_diags[0][1:], C_diags[1], C_diags[2][:-1])
+    # print(C)
+    # print((np.linalg.eig(C).eigenvalues))
+
+    A = np.identity((Nr+1)*(Nz+1))
+    E = np.identity(Nr+1)
+    for i in range(1, Nz):
+        A[i * (Nr+1):(i + 1) * (Nr+1), i * (Nr+1):(i + 1) * (Nr+1)] = C
+        A[i * (Nr+1):(i + 1) * (Nr+1), (i - 1) * (Nr+1):i * (Nr+1)] = -E
+        A[i * (Nr+1):(i + 1) * (Nr+1), (i + 1) * (Nr+1):(i + 2) * (Nr+1)] = -E
+    # print(A)
+    # print((np.linalg.eig(A).eigenvalues))
+
     np.random.seed(0)
-    x = np.random.rand(side)
+    x = np.random.rand(A.shape[0])
     x = np.round(x, 2)
+    # print(x)
     b = A @ x
-    print(np.max(x - np.linalg.solve(A, b)))
-    print(lmatrix(A.astype(np.int64)))
-    print(lmatrix(b))
-    print(lmatrix(x))
+    # print(b)
+    # print(epsilon(x, np.linalg.solve(A, b)))
+
+    F = b.reshape((Nz+1, Nr+1))
+    # print(F)
+    V = np.zeros(F.shape)
+    odd_even_elimination(C_diags, F, n, V)
+    print(epsilon(x, V.flatten()))
+    # print(F.flatten())
+    # print(V.flatten())
+    # print(x)
+    if latex_flag:
+        print(lmatrix(A.astype(np.int64)))
+        print(lmatrix(b))
+        print(lmatrix(x))
 else:
-    print('no', test_name)
+    print('no', argv[1])
