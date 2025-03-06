@@ -30,6 +30,8 @@ def epsilon(v1, v2):
     # return np.max(v1 - v2)
     d = v1 - v2
     return abs(max(d.min(), d.max(), key=abs))
+def delta(v, tilde_v, order):
+    return np.linalg.norm(v - tilde_v, order) / np.linalg.norm(v, order)
 
 # solve linear system by odd-even elimination (complete reduction)
 # C - array of diagonals (b_m, c_m, d_m) for 1 block `C`
@@ -75,6 +77,7 @@ def odd_even_elimination(C, F, n, V):
 
 
 np.set_printoptions(linewidth=np.inf)
+fmt = "%0.2e"
 latex_flag = len(argv) > 2 and argv[2] == 'latex'
 if argv[1] == 'w':
     r = Symbol('r')
@@ -91,11 +94,12 @@ if argv[1] == 'w':
         ( sin(r) + 2, log(r) + z**(0.5) ),
     ]
     for test_num, test_case in enumerate(test_cases):
+        print('test', test_num+1, test_case)
         k, u = test_case
         f = -( (1 / r) * diff(r * k * u.diff(r), r) + u.diff(z).diff(z))
         phi = chi * u - k * u.diff(r)
         if latex_flag:
-            print(str(test_num)+'&'+latex(k)+'&'+latex(u)+'&'+latex(simplify(f))+'&'+latex(simplify(phi).subs(r, 'R0'))+'\\\\')
+            print(str(test_num+1)+'&$'+latex(k)+'$&$'+latex(u)+'$&$'+latex(simplify(f))+'$&$'+latex(simplify(phi).subs(r, 'R0'))+'$\\\\')
         def n_k(param_r):
             return N(k.subs({r: param_r}))
         def n_u(param_r, param_z):
@@ -105,7 +109,8 @@ if argv[1] == 'w':
         def n_phi_1(param_z):
             return N(phi.subs({r: R_0, z: param_z}))
 
-        for Nr, n in ((3, 2), ):
+        prev_delta_1 = np.inf
+        for Nr, n in [(2**i, i) for i in range(1, int(argv[2]))]:
             Nz = 2**n
             h_r = (R_1 - R_0) / Nr
             def r_1(i):
@@ -115,8 +120,6 @@ if argv[1] == 'w':
             h_z = L / Nz
             def z_1(i):
                 return (h_z * i)
-            def z_2(i): #
-                return (z_1(i) + h_z / 2)
             
             C_diags = np.zeros((3, Nr+1))
             for i in range(3):
@@ -170,8 +173,18 @@ if argv[1] == 'w':
             V = np.zeros(F.shape)
             odd_even_elimination(C_diags, F, n, V)
             # print('V=',V)
-            print(epsilon(x, V) / np.max(x))
+            # print(epsilon(x, V) / np.max(x))
             # print(x - V)
+            # print(Nr+'&'+Nz+'&'+delta(x, V, 1)+'&'+delta(x, V, 2)+'&'+delta(x, V, np.inf)+'\\\\')
+            # print(C_diags.dtype)
+            # print(F.dtype)
+            # print(V[1, 2])
+            ds = np.average(np.array([delta(x, V, 1), delta(x, V, 2), delta(x, V, np.inf)]))
+            print(Nr,Nz,fmt%delta(x, V, 1),fmt%delta(x, V, 2),fmt%delta(x, V, np.inf),'%0.2f'%(prev_delta_1/ds),sep='&',end='\\\\\n')
+            prev_delta_1 = ds
+            # print(delta(x, V, 1))
+            # print(delta(x, V, 2))
+            # print(delta(x, V, np.inf))
 elif argv[1] == 'eq':
     Nr = 3
     n = 2
@@ -222,6 +235,7 @@ elif argv[1] == 'eq':
     V = np.zeros(F.shape)
     odd_even_elimination(C_diags, F, n, V)
     print(epsilon(x, V.flatten()))
+    print(Nr,Nz,fmt%delta(x, V.flatten(), 1),fmt%delta(x, V.flatten(), 2),fmt%delta(x, V.flatten(), np.inf),sep='&',end='\\\\\n')
     # print(F.flatten())
     # print(V.flatten())
     # print(x)
