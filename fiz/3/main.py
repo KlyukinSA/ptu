@@ -75,10 +75,101 @@ def odd_even_elimination(C, F, n, V):
             accumulate(k, phi, psi, V[j])
             # print(k, j, phi, psi, V[j])
 
+def calculate_Nz(n):
+    return 2**n
+def calculate_h_r(R_0, R_1, Nr):
+    return (R_1 - R_0) / Nr
+def calculate_h_z(L, Nz):
+    return L / Nz
+def make_r_1(R_0, h_r):
+    def r_1(i):
+        return (R_0 + h_r * i)
+    return r_1
+def make_r_2(r_1, h_r):
+    def r_2(i):
+        return (r_1(i) + h_r / 2)
+    return r_2
+def make_z_1(h_z):
+    def z_1(i):
+        return (h_z * i)
+    return z_1
+
+def calculate_solution_grid(funcs, Nr, n, R_0, R_1, L):
+    n_k, n_f, chi, n_phi_1, phi_2, phi_3, phi_4 = funcs
+
+    Nz = calculate_Nz(n)
+    h_r = calculate_h_r(R_0, R_1, Nr)
+    h_z = calculate_h_z(L, Nz)
+
+    r_1 = make_r_1(R_0, h_r)
+    r_2 = make_r_2(r_1, h_r)
+    z_1 = make_z_1(h_z)
+
+    C_diags = np.zeros((3, Nr+1))
+    for i in range(3):
+        for j in range(Nr+1):
+            if i == 0:
+                if j == 0:
+                    v = 0
+                elif j == Nr:
+                    v = 0
+                else:
+                    v = -((h_z**2)/(h_r**2)) * (r_2(j-1)/r_1(j)) * n_k(r_2(j-1))
+            elif i == 1:
+                if j == 0:
+                    v = 2 + 2 * ((h_z**2)/h_r) * (chi + (r_2(j)/(r_1(j)*h_r)) * n_k(r_2(j)))
+                elif j == Nr:
+                    v = 1
+                else:
+                    v = 2 + ((h_z**2)/(h_r**2)) * (r_2(j-1) * n_k(r_2(j-1)) + r_2(j) * n_k(r_2(j))) / r_1(j)
+            else:
+                if j == 0:
+                    v = -2 * ((h_z**2)/(h_r**2)) * (r_2(j)/r_1(j)) * n_k(r_2(j))
+                elif j == Nr:
+                    v = 0
+                else:
+                    v = -((h_z**2)/(h_r**2)) * (r_2(j)/r_1(j)) * n_k(r_2(j))
+            # print(i, j, v)
+            C_diags[i, j] = v
+    # C = tridiag(C_diags[0][1:], C_diags[1], C_diags[2][:-1])
+    # print('C=',C_diags)
+
+    F = np.zeros((Nz+1, Nr+1))
+    for i in range(Nz+1):
+        for j in range(Nr+1):
+            if i == 0:
+                F[i, j] = phi_3(r_1(j))
+            elif i == Nz:
+                F[i, j] = phi_4(r_1(j))
+            elif j == Nr:
+                F[i, j] = phi_2(z_1(i))
+            elif j == 0:
+                F[i, j] = h_z**2 * (n_f(r_1(j), z_1(i)) + 2 * (n_phi_1(z_1(i))/h_r))
+            else:
+                F[i, j] = h_z**2 * n_f(r_1(j), z_1(i))
+    j = Nr
+    odd_even_elimination_F_modification = np.zeros((Nz+1, ))
+    for i in range(1, Nz):
+        odd_even_elimination_F_modification[i] = F[i - 1, j] + F[i + 1, j]
+    for i in range(1, Nz):
+        F[i, j] -= odd_even_elimination_F_modification[i]
+    # print('F=',F)
+
+    V = np.zeros(F.shape)
+    odd_even_elimination(C_diags, F, n, V)
+    return V
+
+def calculate_solution_at(point, V, R_0, h_r, h_z):
+    return V[round((point[1]-0)/h_z), round((point[0]-R_0)/h_r)]
+
 
 np.set_printoptions(linewidth=np.inf)
 fmt = "%0.2e"
 latex_flag = len(argv) > 2 and argv[2] == 'latex'
+point_flag = len(argv) > 4 and argv[4] == 'point'
+custom = [1.3, 1.3] # specified coordinates
+if point_flag:
+    print('custom =',custom)
 if argv[1] == 'w':
     r = Symbol('r')
     z = Symbol('z')
@@ -109,82 +200,37 @@ if argv[1] == 'w':
         def n_phi_1(param_z):
             return N(phi.subs({r: R_0, z: param_z}))
 
+        def phi_2(z):
+            return n_u(R_1, z)
+        def phi_3(r):
+            return n_u(r, 0)
+        def phi_4(r):
+            return n_u(r, L)
+        funcs = (n_k, n_f, chi, n_phi_1, phi_2, phi_3, phi_4)
+
         prev_delta_1 = np.inf
-        for Nr, n in [(2**i, i) for i in range(1, int(argv[2]))]:
-            Nz = 2**n
-            h_r = (R_1 - R_0) / Nr
-            def r_1(i):
-                return (R_0 + h_r * i)
-            def r_2(i):
-                return (r_1(i) + h_r / 2)
-            h_z = L / Nz
-            def z_1(i):
-                return (h_z * i)
+        for Nr, n in [(2**i, i) for i in range(1, int(argv[3]))]:            
+            V = calculate_solution_grid(funcs, Nr, n, R_0, R_1, L)
             
-            C_diags = np.zeros((3, Nr+1))
-            for i in range(3):
-                for j in range(Nr+1):
-                    if i == 0:
-                        if j == 0:
-                            v = 0
-                        elif j == Nr:
-                            v = 0
-                        else:
-                            v = -((h_z**2)/(h_r**2)) * (r_2(j-1)/r_1(j)) * n_k(r_2(j-1))
-                    elif i == 1:
-                        if j == 0:
-                            v = 2 + 2 * ((h_z**2)/h_r) * (chi + (r_2(j)/(r_1(j)*h_r)) * n_k(r_2(j)))
-                        elif j == Nr:
-                            v = 1
-                        else:
-                            v = 2 + ((h_z**2)/(h_r**2)) * (r_2(j-1) * n_k(r_2(j-1)) + r_2(j) * n_k(r_2(j))) / r_1(j)
-                    else:
-                        if j == 0:
-                            v = -2 * ((h_z**2)/(h_r**2)) * (r_2(j)/r_1(j)) * n_k(r_2(j))
-                        elif j == Nr:
-                            v = 0
-                        else:
-                            v = -((h_z**2)/(h_r**2)) * (r_2(j)/r_1(j)) * n_k(r_2(j))
-                    # print(i, j, v)
-                    C_diags[i, j] = v
-            # C = tridiag(C_diags[0][1:], C_diags[1], C_diags[2][:-1])
-            # print('C=',C_diags)
+            Nz = calculate_Nz(n)
+            h_r = calculate_h_r(R_0, R_1, Nr)
+            h_z = calculate_h_z(L, Nz)
+
+            r_1 = make_r_1(R_0, h_r)
+            z_1 = make_z_1(h_z)
             x = np.zeros((Nz+1, Nr+1))
             for i in range(Nz+1):
                 for j in range(Nr+1):
                     x[i, j] = n_u(r_1(j), z_1(i))
             # print('x=',x)
-            F = np.zeros(x.shape)
-            for i in range(Nz+1):
-                for j in range(Nr+1):
-                    if i == 0 or i == Nz or j == Nr:
-                        F[i, j] = x[i, j]
-                    elif j == 0:
-                        F[i, j] = h_z**2 * (n_f(r_1(j), z_1(i)) + 2 * (n_phi_1(z_1(i))/h_r))
-                    else:
-                        F[i, j] = h_z**2 * n_f(r_1(j), z_1(i))
-            j = Nr
-            odd_even_elimination_F_modification = np.zeros((Nz+1, ))
-            for i in range(1, Nz):
-                odd_even_elimination_F_modification[i] = F[i - 1, j] + F[i + 1, j]
-            for i in range(1, Nz):
-                F[i, j] -= odd_even_elimination_F_modification[i]
-            # print('F=',F)
-            V = np.zeros(F.shape)
-            odd_even_elimination(C_diags, F, n, V)
-            # print('V=',V)
-            # print(epsilon(x, V) / np.max(x))
-            # print(x - V)
-            # print(Nr+'&'+Nz+'&'+delta(x, V, 1)+'&'+delta(x, V, 2)+'&'+delta(x, V, np.inf)+'\\\\')
-            # print(C_diags.dtype)
-            # print(F.dtype)
-            # print(V[1, 2])
+            
             ds = np.average(np.array([delta(x, V, 1), delta(x, V, 2), delta(x, V, np.inf)]))
-            print(Nr,Nz,fmt%delta(x, V, 1),fmt%delta(x, V, 2),fmt%delta(x, V, np.inf),'%0.2f'%(prev_delta_1/ds),sep='&',end='\\\\\n')
+            if point_flag:
+                v = calculate_solution_at(custom, V, R_0, h_r, h_z) 
+                print(v, fmt % abs(v - n_u(custom[0], custom[1])))
+            else:
+                print(Nr,Nz,fmt%delta(x, V, 1),fmt%delta(x, V, 2),fmt%delta(x, V, np.inf),'%0.2f'%(prev_delta_1/ds),sep='&',end='\\\\\n')
             prev_delta_1 = ds
-            # print(delta(x, V, 1))
-            # print(delta(x, V, 2))
-            # print(delta(x, V, np.inf))
 elif argv[1] == 'eq':
     Nr = 3
     n = 2
