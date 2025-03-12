@@ -3,40 +3,39 @@
 \subsection{Невязка во внутренних точках}
 
 Будем искать невязку в следующем виде:
-\[
-  \tilde{\xi}_{i, j} = \frac{\xi_{i, j}}{h_r h_z}
-\]
+\[ \tilde{\xi}_{i, j} = \frac{\xi_{i, j}}{h_r h_z} \]
 
+Обозначим
+\[ \Phi_{1,r} = \frac{1}{12} r k \frac{\partial^4 u}{\partial r^4} + \frac{1}{6}\frac{\partial r k}{\partial r}\frac{\partial^3 u}{\partial r^3} + \frac{1}{8} \frac{\partial^2 r k}{\partial r^2}\frac{\partial^2 u}{\partial r^2} + \frac{1}{24} \frac{\partial^3 r k}{\partial r^3}\frac{\partial u}{\partial r} \]
+\[ \Phi_{1,z} = \frac{1}{12} r \frac{\partial^4 u}{\partial z^4} \]
+
+Тогда невязка
 \begin{align*}
-  &\tilde{\xi}_{i, j} = 
-  h^2_r\left[ \frac{1}{12} r k \frac{\partial^4 u}{\partial r^4} + \frac{1}{6}\frac{\partial r k}{\partial r}\frac{\partial^3 u}{\partial r^3}
-  + \frac{1}{8} \frac{\partial^2 r k}{\partial r^2}\frac{\partial^2 u}{\partial r^2}
-  + \frac{1}{24} \frac{\partial^3 r k}{\partial r^3}\frac{\partial u}{\partial r} \right]_{i,j} + \mathcal{O}(h_r^3) + \\
-  &+ h^2_z \left[
-    \frac{1}{12} r \frac{\partial^4 u}{\partial z^4}
-     \right]_{i, j} + \mathcal{O}(h_z^3)
+  &\tilde{\xi}_{i, j} = h_r^0 h_z^0 \left[ rf(r, z) + \pdv{}{r} \left ( r k(r) \pdv{u}{r} \right ) + \pdv[2]{ru}{z} \right]_{i, j} + \\
+  & + h^2_r\left[ \Phi_{1,r} \right]_{i,j} + \mathcal{O}(h_r^3) + h^2_z \left[ \Phi_{1,z} \right]_{i, j} + \mathcal{O}(h_z^3)
 \end{align*}
-Порядок аппроксимации $p_r = 2 - 0 = 2 $, $ p_z = 2 - 0 = 2 $.
+
+% Можно заметить, что первая скобка тождественно равна нулю по основному уравнению. Значит 
+Порядок аппроксимации $ p_r = 2 - 0 = 2 $, $ p_z = 2 - 0 = 2 $.
 
 \subsection{Невязка на левой границе}
 
 Будем искать невязку в следующем виде:
-\[ \Tilde{\xi}_{0, j} = \frac{\xi_{0, j}}{h_z} \]
-Получаем:
+\[ \tilde{\xi}_{0, j} = \frac{\xi_{0, j}}{h_z} \]
+
+Обозначим
+\[ \Phi_{2,r} = \frac{1}{6} rk \frac{\partial^3 u}{ \partial r^3} +   \frac{1}{4} \frac{\partial rk}{ \partial r} \frac{\partial^2 u}{ \partial r^2} + \frac{1}{8} \frac{\partial^2 rk}{ \partial r^2} \frac{\partial u}{ \partial r} \]
+\[ \Phi_{2,z} = \frac{1}{24} \frac{\partial^4 u}{ \partial z^4} \]
+
+Тогда невязка
 \begin{align*}
-  &\Tilde{\xi}_{i, j} = 
-  h^2_r \left[
-  \frac{1}{6} rk \frac{\partial^3 u}{ \partial r^3} +
-  \frac{1}{4} \frac{\partial rk}{ \partial r} \frac{\partial^2 u}{ \partial r^2} +
-  \frac{1}{8} \frac{\partial^2 rk}{ \partial r^2} \frac{\partial u}{ \partial r}
-  \right]_{i ,j} + \mathcal{O}(h^3_r) + \\
- & + h_r\left[ r h^2_z\left( 
-  \frac{1}{24} \frac{\partial^4 u}{ \partial z^4}
-  \right)_{i, j}
-  + \mathcal{O}(h^3_z) \right]
+  &\tilde{\xi}_{i, j} = h_r^0 \left[ r k(r) \pdv{u}{r} - r \chi_1 u + r \varphi_1(z) \right]_{i, j} + h_z^0 h_r \frac{1}{2} \left[ rf(r, z) + \pdv{}{r} \left ( r k(r) \pdv{u}{r} \right ) + \pdv[2]{ru}{z} \right]_{i, j} + \\
+  & + h^2_r \left[ \Phi_{2,r} \right]_{i ,j} + \mathcal{O}(h^3_r) + h_r\left( r h^2_z\left[ \Phi_{2,z} \right]_{i, j}
+  + \mathcal{O}(h^3_z) \right)
 \end{align*}
 
-Порядок аппроксимации $ p_r = 2 - 0 = 2, p_z = 2 - 0 = 2 $.
+% Можно заметить что первая скобка равна нулю по граничному условию. Значит это главный член погрешности относительно r и . Можно заметить что вторая скобка равна нулю и это главный член погрешности относительно z. Значит 
+$ p_r = 2 - 0 = 2 $ и $ p_z = 2 - 0 = 2 $.
 
 По определению невязки на остальных границах она равна нулю.
 

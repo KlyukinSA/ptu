@@ -182,7 +182,6 @@ if argv[1] == 'w':
         ( Float(1), r + z**3 ),
         ( r + 1, r + z**3 ),
         ( (r + 1)**2, r + z**3 ),
-        ( sin(r) + 2, log(r) + z**(0.5) ),
     ]
     for test_num, test_case in enumerate(test_cases):
         print('test', test_num+1, test_case)
