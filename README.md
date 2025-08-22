@@ -1,6 +1,6 @@
-тут код в основном! отчеты вот https://drive.google.com/drive/folders/1IOIJFAu2wy7CuSaZgksyZtNc2X1HuTyQ?usp=sharing
+Репозиторий состоит из заданий лаб (курсовых), софта для решения лаб, отчетов к лабам, и все в формате plain text.
 
-для запуска python скриптов необходимы библиотеки, указанные в [pip_list.txt](pip_list.txt)
+Репозиторий намеренно не содержит бинарные файлы или большие текстовые файлы. Идея в том чтобы определить репозиторий системы контроля версий как хранилище диффов (патчей) текстовых файлов. Для хранения остальных материалов предусмотрен [диск](https://drive.google.com/drive/folders/1IOIJFAu2wy7CuSaZgksyZtNc2X1HuTyQ?usp=sharing). В нем в основном расположены документы к лабам и материалы в области теоретических знаний по дисциплинам.
 
 # 6 sem
 
@@ -60,5 +60,23 @@ trkpo
 [oms](oms)
 ЦОМС
 
-![deftones](https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpm1.narvii.com%2F6060%2Ffeb30541fd4b866c7804686a32c2a73b9a980bfb_hq.jpg&f=1&nofb=1&ipt=e1211f78da741946550f0a8e3bcb1458cc2bbeec6a5b7b6ccbfc866ecdceb39c&ipo=images)
-<!-- ![deftones](https://i.redd.it/d8gwtg0tlvfc1.jpeg) -->
+# 8 sem
+
+[fiz](fiz)
+РПОМФП
+
+[zi](zi)
+ЗИ
+
+ap
+АПМиСПО
+
+trkpo
+ТРКПО
+
+vitpo
+ВиТПО
+
+
+[На лечение рака в Сербии](https://www.tbank.ru/cf/9RJQG9zpm8Q)
+
